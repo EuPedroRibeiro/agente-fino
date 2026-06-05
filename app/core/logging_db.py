@@ -59,7 +59,9 @@ def get_connection() -> sqlite3.Connection:
 
 
 def _use_memory_database() -> bool:
-    return is_cloud() and not settings.database_url
+    # Em cloud/serverless, não grave SQLite no filesystem do bundle.
+    # Persistência real fica no Postgres; action_logs locais ficam só em memória.
+    return is_cloud()
 
 
 def _ensure_memory_anchor() -> None:
