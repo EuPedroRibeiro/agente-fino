@@ -27,6 +27,7 @@ from app.core.config import settings
 from app.core.production import production_config_errors
 from app.core.runtime import is_cloud
 from app.db import get_database_status
+from app.services.document_lookup import DocumentLookupService
 from modules.mcp_brasil import MCPBrasilRouter, MCPBrasilService
 
 
@@ -65,6 +66,7 @@ class NexusCore:
         self.memory = AgentMemory()
         self.model_router = ModelRouter()
         self.mcp_brasil = MCPBrasilService()
+        self.document_lookup = DocumentLookupService()
 
     def chat(self, request: AgentChatRequest) -> AgentResponse:
         started = time.perf_counter()
@@ -96,6 +98,9 @@ class NexusCore:
                     "fallback_reason": "; ".join(config_errors),
                 }
                 return self._to_response(state)
+            document_result = self.document_lookup.handle(request.message, user_id=request.user_id)
+            if document_result:
+                return self._chat_with_document_lookup(request, document_result, started)
             if MCPBrasilRouter.should_use_mcp_brasil(request.message):
                 return self._chat_with_mcp_brasil(request, started)
             route = classify_message(request.message)
@@ -168,6 +173,58 @@ class NexusCore:
             state.confidence = 0.1
         latency_ms = int((time.perf_counter() - started) * 1000)
         record_run(state, latency_ms=latency_ms, success=success, error=error)
+        return self._to_response(state)
+
+    def _chat_with_document_lookup(self, request: AgentChatRequest, result: dict, started: float) -> AgentResponse:
+        latency_ms = int((time.perf_counter() - started) * 1000)
+        tool = result.get("tool") or "document_lookup"
+        state = AgentState(
+            conversation_id=request.conversation_id or str(uuid4()),
+            user_id=request.user_id,
+            user_message=request.message,
+            intent=result.get("intent") or "document_lookup",
+            category=result.get("category") or "authorized_document_lookup",
+            mode="AUTHORIZED_LOOKUP",
+            final_answer=result.get("answer") or "Nao consegui concluir a consulta documental.",
+            selected_tools=[tool],
+            tool_calls=[
+                {
+                    "name": tool,
+                    "status": result.get("status") or "error",
+                    "arguments": {"documents": result.get("documents") or []},
+                    "latency_ms": result.get("latency_ms") or latency_ms,
+                    "result": {"status": result.get("status"), "documents": result.get("documents") or []},
+                }
+            ],
+            web_used=False,
+            web_status={"used": False, "skipped": "authorized_document_provider"},
+            rag_status={"used": False, "skipped": "authorized_document_provider"},
+            model_used={
+                "provider": "local" if tool == "cpf_validate_local" else "document-lookup",
+                "model": tool,
+                "used_model": False,
+                "llm_used": False,
+                "mode": "AUTHORIZED_LOOKUP",
+                "documents": result.get("documents") or [],
+            },
+            risk_level="low",
+            confidence=0.98 if result.get("status") == "ok" else 0.7,
+            warnings=[] if result.get("status") == "ok" else ["A consulta documental nao foi concluida integralmente."],
+            timings_ms={"total": latency_ms, "document_lookup": int(result.get("latency_ms") or latency_ms)},
+        )
+        conversation_logs.add_message(conversation_id=state.conversation_id, role="user", content=state.user_message)
+        conversation_logs.add_message(
+            conversation_id=state.conversation_id,
+            role="assistant",
+            content=result.get("history_summary") or state.final_answer,
+            provider=state.model_used["provider"],
+            model=state.model_used["model"],
+            intent=state.intent,
+            tools_used=state.selected_tools,
+            web_sources_count=0,
+            latency_ms=latency_ms,
+        )
+        record_run(state, latency_ms=latency_ms, success=result.get("status") == "ok", error=None)
         return self._to_response(state)
 
     def _chat_with_mcp_brasil(self, request: AgentChatRequest, started: float) -> AgentResponse:
@@ -327,6 +384,7 @@ class NexusCore:
             "catalog_summary": catalog["summary"],
             "provider": self.model_router.status(),
             "mcp_brasil": self.mcp_brasil.status(),
+            "document_lookup": self.document_lookup.status(),
             "tools": list_tools(),
             "observability": langfuse_status(),
         }
@@ -335,7 +393,9 @@ class NexusCore:
         return get_ai_catalog()
 
     def providers_status(self) -> dict:
-        return self.model_router.status()
+        status = self.model_router.status()
+        status["document_lookup"] = self.document_lookup.status()
+        return status
 
     def retest_gemini(self) -> dict:
         return self.model_router.retest_gemini()

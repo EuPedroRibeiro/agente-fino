@@ -118,6 +118,17 @@ class Settings(BaseModel):
     mcp_brasil_timeout: int = Field(default_factory=lambda: int(os.getenv("MCP_BRASIL_TIMEOUT", "60")))
     mcp_brasil_allowed_features: str = Field(default_factory=lambda: os.getenv("MCP_BRASIL_ALLOWED_FEATURES", ""))
     mcp_brasil_datasets: str = Field(default_factory=lambda: os.getenv("MCP_BRASIL_DATASETS", ""))
+    document_lookup_enabled: bool = Field(default_factory=lambda: os.getenv("DOCUMENT_LOOKUP_ENABLED", "false").lower() == "true")
+    document_lookup_base_url: str = Field(default_factory=lambda: os.getenv("DOCUMENT_LOOKUP_BASE_URL", ""))
+    document_lookup_api_key: str = Field(default_factory=lambda: os.getenv("DOCUMENT_LOOKUP_API_KEY", ""))
+    document_lookup_timeout_seconds: float = Field(default_factory=lambda: float(os.getenv("DOCUMENT_LOOKUP_TIMEOUT_SECONDS", "15")))
+    document_lookup_method: str = Field(default_factory=lambda: os.getenv("DOCUMENT_LOOKUP_METHOD", "GET"))
+    document_lookup_cpf_path: str = Field(default_factory=lambda: os.getenv("DOCUMENT_LOOKUP_CPF_PATH", "/cpf/{document}"))
+    document_lookup_cnpj_path: str = Field(default_factory=lambda: os.getenv("DOCUMENT_LOOKUP_CNPJ_PATH", "/cnpj/{document}"))
+    document_lookup_api_key_header: str = Field(default_factory=lambda: os.getenv("DOCUMENT_LOOKUP_API_KEY_HEADER", "Authorization"))
+    document_lookup_api_key_prefix: str = Field(default_factory=lambda: os.getenv("DOCUMENT_LOOKUP_API_KEY_PREFIX", "Bearer "))
+    cpf_lookup_rate_limit_per_hour: int = Field(default_factory=lambda: max(1, int(os.getenv("CPF_LOOKUP_RATE_LIMIT_PER_HOUR", "100"))))
+    cnpj_lookup_rate_limit_per_hour: int = Field(default_factory=lambda: max(1, int(os.getenv("CNPJ_LOOKUP_RATE_LIMIT_PER_HOUR", "300"))))
 
 
 settings = Settings()

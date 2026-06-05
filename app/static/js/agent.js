@@ -394,8 +394,9 @@ async function postChat(payload) {
     headers: { "Content-Type": "application/json; charset=utf-8" },
     body: JSON.stringify(payload),
   });
-  if (!response.ok) throw new Error("Falha ao enviar mensagem.");
-  return response.json();
+  const data = await readJsonResponse(response);
+  if (!response.ok) throw new Error(errorMessageFromPayload(data, "Nao foi possivel concluir a mensagem agora."));
+  return data;
 }
 
 async function runWithActivity(payload) {
@@ -405,10 +406,22 @@ async function runWithActivity(payload) {
     headers: { "Content-Type": "application/json; charset=utf-8" },
     body: JSON.stringify(payload),
   });
-  if (!response.ok) throw new Error("Execucao em streaming indisponivel.");
-  const data = await response.json();
+  const data = await readJsonResponse(response);
+  if (!response.ok) throw new Error(errorMessageFromPayload(data, "Execucao em streaming indisponivel."));
   if (!data.run_id) throw new Error("Execucao sem identificador.");
   return streamRunEvents(data.run_id);
+}
+
+async function readJsonResponse(response) {
+  try {
+    return await response.json();
+  } catch {
+    return {};
+  }
+}
+
+function errorMessageFromPayload(data, fallback) {
+  return data?.detail || data?.message || data?.error || fallback;
 }
 
 function streamRunEvents(runId) {

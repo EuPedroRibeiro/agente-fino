@@ -3,6 +3,8 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from app.security.documents import mask_personal_documents
+
 
 SECRET_PATTERNS = [
     re.compile(r"AIza[0-9A-Za-z_\-]{20,}"),
@@ -22,7 +24,7 @@ def mask_secrets(value: Any) -> Any:
     text = value
     for pattern in SECRET_PATTERNS:
         text = pattern.sub(lambda match: f"{match.group(1)}=***" if match.lastindex and match.lastindex >= 2 else "***", text)
-    return text
+    return mask_personal_documents(text)
 
 
 def contains_secret(value: str) -> bool:

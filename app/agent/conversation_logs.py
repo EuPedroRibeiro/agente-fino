@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from app.db import get_conversation_repository
+from app.security.documents import mask_personal_documents
 
 
 def init_conversation_logs() -> None:
@@ -48,7 +49,7 @@ def add_message(
     return get_conversation_repository().add_message(
         conversation_id=conversation_id,
         role=role,
-        content=content,
+        content=mask_personal_documents(content),
         provider=provider,
         model=model,
         intent=intent,
@@ -64,4 +65,3 @@ def get_message(message_id: int) -> dict[str, Any] | None:
 
 def list_messages(conversation_id: str) -> list[dict[str, Any]]:
     return get_conversation_repository().list_messages(conversation_id)
-

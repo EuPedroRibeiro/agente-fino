@@ -5,6 +5,7 @@ import unicodedata
 
 from app.agent.calculator import looks_like_calculation
 from app.agent.conversation_policy import NO_WEB_KEYWORDS, WEB_TRIGGER_KEYWORDS, should_force_web
+from app.security.documents import classify_document_request
 from app.services.folder_size import resolve_folder_target
 
 
@@ -21,6 +22,9 @@ LOCAL_METRIC_INTENTS = {
     "file_count",
     "followup_accept_offer",
     "language_correction",
+    "cpf_lookup",
+    "cpf_validate",
+    "cnpj_lookup",
 }
 SIMPLE_INTENTS = {"greeting", "casual_chat", "time_query", "date_query", "identity_query"}
 DIRECT_INTENTS = SIMPLE_INTENTS | LOCAL_METRIC_INTENTS | {"calculation_query"}
@@ -66,6 +70,10 @@ def classify_message(message: str) -> dict:
         return {"intent": "identity_query", "category": "open_world"}
     if looks_like_calculation(text):
         return {"intent": "calculation_query", "category": "math"}
+
+    document_route = classify_document_request(message)
+    if document_route:
+        return document_route
 
     if _asks_memory_save(text):
         return {"intent": "memory_save", "category": "memory"}

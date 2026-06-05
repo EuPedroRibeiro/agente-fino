@@ -74,6 +74,12 @@ def _sse(event: str, data: dict) -> str:
 def _activity_message_for_route(route: dict) -> str:
     intent = route.get("intent")
     path = route.get("path")
+    if intent == "cpf_validate":
+        return "Validando CPF localmente..."
+    if intent == "cpf_lookup":
+        return "Consultando CPF na fonte autorizada..."
+    if intent == "cnpj_lookup":
+        return "Consultando CNPJ na fonte autorizada..."
     if intent == "file_count":
         return f"Contando arquivos em {path}..." if path else "Contando arquivos..."
     if intent == "folder_size":
@@ -202,11 +208,23 @@ def agent_catalog() -> dict:
 
 
 @router.post("/api/agent/chat")
-def agent_chat(payload: AgentChatRequest) -> dict:
-    validate_chat_message(payload.message)
-    if _is_darkforest_command(payload.message):
-        return _darkforest_redirect_response(payload).model_dump()
-    return core.chat(payload).model_dump()
+def agent_chat(payload: AgentChatRequest, request: Request) -> dict:
+    try:
+        validate_chat_message(payload.message)
+        if _is_darkforest_command(payload.message):
+            return _darkforest_redirect_response(payload).model_dump()
+        return core.chat(payload).model_dump()
+    except HTTPException:
+        raise
+    except Exception as exc:
+        error = mask_secrets(str(exc))
+        audit_event(
+            "agent_chat_failed",
+            request=request,
+            details={"error": error, "conversation_id": payload.conversation_id},
+            severity="error",
+        )
+        return _friendly_chat_error_response(payload).model_dump()
 
 
 @router.post("/api/agent/runs")
@@ -282,11 +300,10 @@ def agent_run_events(run_id: str) -> StreamingResponse:
         started = time.perf_counter()
         payload: AgentChatRequest = run["payload"]
         try:
-            if MCPBrasilRouter.should_use_mcp_brasil(payload.message):
+            route = classify_message(payload.message)
+            if route.get("intent") not in {"cpf_lookup", "cpf_validate", "cnpj_lookup"} and MCPBrasilRouter.should_use_mcp_brasil(payload.message):
                 plan = MCPBrasilRouter.plan_query(payload.message)
                 route = {"intent": "mcp_brasil", "category": "public_data_br", "tool": plan.tool_name}
-            else:
-                route = classify_message(payload.message)
             yield _sse("run_started", {"run_id": run_id, "message": "Pensando..."})
             yield _sse(
                 "route_detected",
@@ -299,6 +316,8 @@ def agent_run_events(run_id: str) -> StreamingResponse:
                 },
             )
             if route.get("intent") in {"folder_size", "file_count", "folder_usage_top"}:
+                yield _sse("local_tool_started", {"run_id": run_id, "message": _activity_message_for_route(route)})
+            if route.get("intent") in {"cpf_lookup", "cpf_validate", "cnpj_lookup"}:
                 yield _sse("local_tool_started", {"run_id": run_id, "message": _activity_message_for_route(route)})
             if route.get("intent") in {"web_research", "deep_web_research"}:
                 yield _sse("web_search_started", {"run_id": run_id, "message": "Pesquisando na web..."})
@@ -338,6 +357,26 @@ def agent_run_events(run_id: str) -> StreamingResponse:
             yield _sse("run_error", {"run_id": run_id, "elapsed_ms": elapsed_ms, "error": error, "message": "Nao consegui concluir a execucao."})
 
     return StreamingResponse(stream(), media_type="text/event-stream; charset=utf-8")
+
+
+def _friendly_chat_error_response(payload: AgentChatRequest) -> AgentResponse:
+    conversation_id = payload.conversation_id or f"conv-{uuid4().hex[:10]}"
+    answer = "Nao consegui concluir essa consulta agora. O erro foi registrado com seguranca; tente novamente em instantes."
+    return AgentResponse(
+        conversation_id=conversation_id,
+        answer=answer,
+        final_answer=answer,
+        intent="chat_error",
+        category="system",
+        mode="SAFE_ERROR",
+        web_used=False,
+        selected_tools=[],
+        model_used={"provider": "safe-error-handler", "model": "route-guard", "used_model": False, "llm_used": False},
+        risk_level="low",
+        confidence=1.0,
+        warnings=["A execucao falhou sem expor dados sensiveis."],
+        timings_ms={"total": 0},
+    )
 
 
 @router.get("/api/agent/runs/{run_id}")

@@ -16,6 +16,10 @@ def tools_for_intent(intent: str, message: str = "") -> list[str]:
         tools.append("system_status")
     if intent == "spooler_status":
         tools.append("spooler_status")
+    if intent in {"cpf_lookup", "cnpj_lookup"}:
+        tools.append("document_lookup")
+    if intent == "cpf_validate":
+        tools.append("cpf_validate_local")
     if intent in {"pc_diagnostic", "analyze_pc", "report_analysis"} or "analise este pc" in text:
         tools.append("analyze_pc")
     if intent in {"disk_usage", "folder_usage_top"} or any(term in text for term in ["pastas ocupam", "ocupa espaço", "uso de disco", "espaco no disco"]):
