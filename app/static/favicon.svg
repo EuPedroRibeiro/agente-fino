@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Agente Fino">
+  <defs>
+    <radialGradient id="orb" cx="42%" cy="34%" r="70%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="18%" stop-color="#d9d9d9"/>
+      <stop offset="38%" stop-color="#111111"/>
+      <stop offset="66%" stop-color="#040404"/>
+      <stop offset="100%" stop-color="#e50914"/>
+    </radialGradient>
+    <radialGradient id="core" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ff8b92"/>
+      <stop offset="44%" stop-color="#e50914"/>
+      <stop offset="100%" stop-color="#7a0008"/>
+    </radialGradient>
+  </defs>
+  <rect width="64" height="64" rx="18" fill="#ffffff"/>
+  <circle cx="32" cy="32" r="20" fill="url(#orb)"/>
+  <circle cx="32" cy="32" r="7" fill="url(#core)"/>
+  <ellipse cx="32" cy="32" rx="30" ry="10" fill="none" stroke="#e50914" stroke-width="2.1" transform="rotate(-24 32 32)"/>
+  <ellipse cx="32" cy="32" rx="29" ry="10" fill="none" stroke="#111111" stroke-opacity="0.28" stroke-width="1.6" transform="rotate(25 32 32)"/>
+  <circle cx="54" cy="20" r="4.2" fill="#e50914"/>
+  <circle cx="10" cy="45" r="3.4" fill="#111111"/>
+  <circle cx="32" cy="32" r="27" fill="none" stroke="#e50914" stroke-opacity="0.24" stroke-dasharray="1.2 4"/>
+</svg>

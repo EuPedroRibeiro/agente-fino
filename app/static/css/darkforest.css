@@ -1,0 +1,322 @@
+body.darkforest-page {
+  min-height: 100dvh;
+  overflow: auto;
+}
+
+.darkforest-shell {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 28px 0 56px;
+}
+
+.darkforest-nav,
+.darkforest-hero,
+.scanner-panel,
+.results-section,
+.history-section {
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(18px);
+}
+
+.darkforest-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 14px 16px;
+}
+
+.darkforest-brand,
+.ghost-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 760;
+}
+
+.darkforest-brand strong {
+  color: var(--red);
+}
+
+.darkforest-nav-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ghost-link {
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.68);
+}
+
+.darkforest-hero {
+  display: grid;
+  grid-template-columns: 1fr minmax(220px, 320px);
+  gap: 24px;
+  margin-top: 22px;
+  padding: clamp(26px, 4vw, 48px);
+}
+
+.darkforest-hero h1 {
+  margin-bottom: 14px;
+  font-size: clamp(2rem, 4vw, 4.4rem);
+  line-height: 0.98;
+}
+
+.darkforest-hero p {
+  max-width: 720px;
+  color: var(--muted);
+  font-size: 1.06rem;
+  line-height: 1.7;
+}
+
+.sensitive-card {
+  display: grid;
+  place-content: center;
+  gap: 8px;
+  min-height: 190px;
+  padding: 24px;
+  border: 1px solid rgba(229, 9, 20, 0.16);
+  border-radius: 28px;
+  background: radial-gradient(circle at 50% 20%, rgba(229, 9, 20, 0.14), transparent 42%), #fff;
+  text-align: center;
+}
+
+.shield-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  margin: 0 auto;
+  border-radius: 18px;
+  background: var(--red);
+  color: #fff;
+  font-weight: 900;
+  box-shadow: 0 16px 34px rgba(229, 9, 20, 0.2);
+}
+
+.shield-icon.large {
+  width: 64px;
+  height: 64px;
+  border-radius: 24px;
+  font-size: 1.6rem;
+}
+
+.scanner-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
+  gap: 22px;
+  margin-top: 22px;
+}
+
+.scanner-panel,
+.results-section,
+.history-section {
+  padding: 24px;
+}
+
+.panel-heading,
+.section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.panel-heading h2,
+.section-heading h2 {
+  margin-bottom: 0;
+}
+
+.scanner-panel textarea {
+  width: 100%;
+  min-height: 132px;
+  margin-top: 10px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: #fff;
+}
+
+.authorization-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 18px 0;
+  color: var(--text-soft);
+  font-weight: 700;
+}
+
+.authorization-check input {
+  width: 18px;
+  min-height: 18px;
+  margin-top: 2px;
+  accent-color: var(--red);
+}
+
+.module-note {
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.scan-steps {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding-left: 22px;
+  color: var(--muted);
+}
+
+.scan-steps li {
+  padding: 8px 0;
+}
+
+.scan-steps li.active {
+  color: var(--red-deep);
+  font-weight: 820;
+}
+
+.scan-steps li.done {
+  color: var(--text);
+}
+
+.status-pill,
+.summary-chip,
+.risk-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  margin-top: 18px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--muted);
+  font-weight: 760;
+  font-size: 0.9rem;
+}
+
+.results-section,
+.history-section {
+  margin-top: 22px;
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.finding-card,
+.history-item {
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 18px;
+  background: #fff;
+}
+
+.finding-card.critical {
+  border-color: rgba(184, 0, 18, 0.28);
+  background: linear-gradient(145deg, rgba(229, 9, 20, 0.08), #fff 42%);
+}
+
+.finding-card.high {
+  border-color: rgba(229, 9, 20, 0.2);
+}
+
+.finding-card h3 {
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+.finding-meta {
+  display: grid;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.masked-secret {
+  display: block;
+  padding: 10px;
+  border-radius: 14px;
+  background: #f7f7f8;
+  color: var(--red-deep);
+  font-family: "Segoe UI Mono", Consolas, monospace;
+  word-break: break-all;
+}
+
+.history-list {
+  display: grid;
+  gap: 10px;
+}
+
+.history-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+}
+
+.sensitive-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(17, 17, 17, 0.42);
+  backdrop-filter: blur(18px);
+}
+
+.sensitive-overlay.hidden {
+  display: none;
+}
+
+.sensitive-modal {
+  width: min(560px, 100%);
+  padding: 34px;
+  border: 1px solid rgba(229, 9, 20, 0.2);
+  border-radius: 32px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--shadow-md);
+}
+
+.sensitive-modal p {
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 820px) {
+  .darkforest-shell {
+    width: min(100% - 18px, 1180px);
+    padding-top: 10px;
+  }
+
+  .darkforest-hero,
+  .scanner-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .darkforest-nav {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+

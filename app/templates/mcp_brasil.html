@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MCP Brasil - Agente Fino</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
+    <link rel="shortcut icon" href="/static/favicon.ico" />
+    <link rel="stylesheet" href="/static/css/agent.css" />
+    <script>
+      const authenticated =
+        localStorage.getItem("agente_fino_authenticated") === "true" ||
+        localStorage.getItem("nexus_authenticated") === "true";
+      if (!authenticated) window.location.replace("/login");
+    </script>
+  </head>
+  <body class="agent-page">
+    <main class="mcp-page">
+      <section class="mcp-panel">
+        <div class="sidebar-brand">
+          <img class="brand-symbol-small agent-brand-logo" src="/static/brand/agente-fino-symbol-reduced.png" alt="" aria-hidden="true" />
+          <div>
+            <strong>Agente <span>Fino</span></strong>
+            <small>MCP Brasil</small>
+          </div>
+        </div>
+        <h1>Dados publicos brasileiros</h1>
+        <p>Modulo integrado ao chat principal para consultar fontes publicas via MCP Brasil.</p>
+        <div class="detail-block provider-grid">
+          <div><span>Status</span><strong>{{ "online" if mcp_brasil_status.running else "offline" }}</strong></div>
+          <div><span>Instalado</span><strong>{{ "sim" if mcp_brasil_status.installed else "nao" }}</strong></div>
+          <div><span>Chat</span><strong>{{ "ativo" if mcp_brasil_status.chat_active else "inativo" }}</strong></div>
+          <div><span>URL</span><strong>{{ mcp_brasil_status.url }}</strong></div>
+        </div>
+        <div class="detail-block">
+          <h2>Exemplos</h2>
+          <p>/mcp status</p>
+          <p>/mcp features</p>
+          <p>/mcp brasilapi cep 27200-000</p>
+          <p>/mcp ibge municipio Volta Redonda</p>
+          <p>/mcp bacen selic</p>
+        </div>
+        <div class="technical-actions">
+          <a class="logout-action" href="/agent">Voltar ao chat</a>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

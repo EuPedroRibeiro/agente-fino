@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Scanner de Vazamento de Chaves - Agente Fino</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
+    <link rel="shortcut icon" href="/static/favicon.ico" />
+    <link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
+    <link rel="stylesheet" href="/static/css/agent.css" />
+    <link rel="stylesheet" href="/static/css/darkforest.css" />
+    <script>
+      const agenteFinoAuthenticated =
+        localStorage.getItem("agente_fino_authenticated") === "true" ||
+        localStorage.getItem("nexus_authenticated") === "true";
+      if (!agenteFinoAuthenticated) {
+        window.location.replace("/login");
+      }
+    </script>
+  </head>
+  <body class="darkforest-page">
+    <main class="darkforest-shell">
+      <nav class="darkforest-nav" aria-label="Navegacao do scanner">
+        <a class="darkforest-brand" href="/agent">
+          <img class="brand-symbol-small" src="/static/brand/agente-fino-symbol-reduced.png" alt="" aria-hidden="true" />
+          <span>Agente <strong>Fino</strong></span>
+        </a>
+        <div class="darkforest-nav-actions">
+          <a class="ghost-link" href="/agent">Voltar ao chat</a>
+          <a class="ghost-link" href="/login" onclick="localStorage.removeItem('agente_fino_authenticated'); localStorage.removeItem('nexus_authenticated')">Sair</a>
+        </div>
+      </nav>
+
+      <section class="darkforest-hero">
+        <div>
+          <p class="eyebrow">Modulo sensivel</p>
+          <h1>Scanner de Vazamento de Chaves</h1>
+          <p>
+            DarkForest Hunter procura possiveis API keys, tokens e credenciais expostas em alvos autorizados.
+            Chaves encontradas sao sempre mascaradas antes de aparecerem na interface.
+          </p>
+        </div>
+        <div class="sensitive-card">
+          <span class="shield-icon" aria-hidden="true">!</span>
+          <strong>Uso autorizado apenas</strong>
+          <small>Nada roda sem confirmacao explicita.</small>
+        </div>
+      </section>
+
+      <section class="scanner-grid">
+        <form id="darkforestForm" class="scanner-panel">
+          <div class="panel-heading">
+            <p class="eyebrow">Analise</p>
+            <h2>Defina o alvo autorizado</h2>
+          </div>
+          <label>
+            Caminho local ou texto autorizado
+            <textarea id="darkforestTarget" rows="4" placeholder="Ex: C:\Users\Suporte\Documents\MeuProjeto ou cole um trecho autorizado"></textarea>
+          </label>
+          <label class="authorization-check">
+            <input id="darkforestAuthorization" type="checkbox" />
+            <span>Confirmo que tenho autorizacao para analisar o alvo informado.</span>
+          </label>
+          <button id="darkforestScanBtn" class="primary-action" type="submit">Iniciar analise sensivel</button>
+          <p class="module-note">Alvos remotos ficam bloqueados por padrao. Baixe ou clone o repositorio autorizado e informe o caminho local.</p>
+        </form>
+
+        <aside class="scanner-panel activity-panel">
+          <div class="panel-heading">
+            <p class="eyebrow">Status</p>
+            <h2>Execucao</h2>
+          </div>
+          <ol id="darkforestSteps" class="scan-steps">
+            <li>Preparando analise...</li>
+            <li>Buscando possiveis credenciais...</li>
+            <li>Validando padroes encontrados...</li>
+            <li>Gerando relatorio...</li>
+            <li>Analise concluida.</li>
+          </ol>
+          <div id="darkforestStatus" class="status-pill">Aguardando alvo</div>
+        </aside>
+      </section>
+
+      <section class="results-section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Relatorio</p>
+            <h2>Achados mascarados</h2>
+          </div>
+          <span id="darkforestSummary" class="summary-chip">Sem analise ainda</span>
+        </div>
+        <div id="darkforestResults" class="results-grid"></div>
+      </section>
+
+      <section class="history-section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Historico seguro</p>
+            <h2>Analises recentes</h2>
+          </div>
+          <button id="darkforestRefreshHistory" class="ghost-action" type="button">Atualizar</button>
+        </div>
+        <div id="darkforestHistory" class="history-list"></div>
+      </section>
+    </main>
+
+    <div id="darkforestGate" class="sensitive-overlay" role="dialog" aria-modal="true" aria-labelledby="sensitiveTitle">
+      <div class="sensitive-modal">
+        <span class="shield-icon large" aria-hidden="true">!</span>
+        <p class="eyebrow">Conteudo sensivel</p>
+        <h2 id="sensitiveTitle">Conteudo sensivel</h2>
+        <p>
+          Este modulo pode identificar credenciais, tokens e chaves de API expostas. Use apenas em projetos,
+          repositorios, arquivos ou ambientes onde voce tenha autorizacao. O uso indevido de credenciais de terceiros
+          pode violar leis, politicas de plataformas e causar prejuizos.
+        </p>
+        <label class="authorization-check modal-check">
+          <input id="darkforestGateCheck" type="checkbox" />
+          <span>Confirmo que tenho autorizacao para analisar os alvos informados.</span>
+        </label>
+        <div class="modal-actions">
+          <a class="ghost-link" href="/agent">Voltar</a>
+          <button id="darkforestContinueBtn" class="primary-action" type="button" disabled>Entendo e quero continuar</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="/static/js/darkforest.js"></script>
+  </body>
+</html>
+

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Agente Fino</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
+    <link rel="shortcut icon" href="/static/favicon.ico" />
+    <link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
+    <link rel="stylesheet" href="/static/css/agent.css" />
+    <script>
+      const agenteFinoAuthenticated =
+        localStorage.getItem("agente_fino_authenticated") === "true" ||
+        localStorage.getItem("nexus_authenticated") === "true";
+      window.location.replace(agenteFinoAuthenticated ? "/agent" : "/login");
+    </script>
+  </head>
+  <body class="redirect-page">
+    <main class="redirect-shell">
+      <img class="brand-symbol-small large" src="/static/brand/agente-fino-symbol-reduced.png" alt="" aria-hidden="true" />
+      <h1>Agente Fino</h1>
+      <p>Preparando a sua experiencia...</p>
+      <p>
+        <a href="/login">Entrar</a>
+        <a href="/agent">Abrir chat</a>
+      </p>
+    </main>
+  </body>
+</html>

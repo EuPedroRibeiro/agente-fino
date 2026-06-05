@@ -1,0 +1,6 @@
+{
+  "fast_provider_order": ["openai", "gemini", "ollama", "local_rules"],
+  "balanced_provider_order": ["gemini", "openai", "ollama", "local_rules"],
+  "expert_provider_order": ["openai", "gemini", "ollama", "local_rules"],
+  "fast_path_enabled": true
+}

@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Agente Fino</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
+    <link rel="shortcut icon" href="/static/favicon.ico" />
+    <link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
+    <link rel="stylesheet" href="/static/css/agent.css" />
+    <script>
+      const agenteFinoAuthenticated =
+        localStorage.getItem("agente_fino_authenticated") === "true" ||
+        localStorage.getItem("nexus_authenticated") === "true";
+      if (!agenteFinoAuthenticated) {
+        window.location.replace("/login");
+      }
+    </script>
+  </head>
+  <body class="agent-page empty-state-active">
+    <main class="app-shell">
+      <aside class="conversation-sidebar" aria-label="Conversas">
+        <div class="sidebar-brand">
+          <img class="brand-symbol-small agent-brand-logo" src="/static/brand/agente-fino-symbol-reduced.png" alt="" aria-hidden="true" />
+          <div>
+            <strong>Agente <span>Fino</span></strong>
+            <small>Ola, Pedro</small>
+          </div>
+        </div>
+
+        <button id="newConversationBtn" class="new-chat-button" type="button">
+          <span aria-hidden="true">+</span>
+          Nova conversa
+        </button>
+
+        <button id="securityShortcutBtn" class="sidebar-action-button" type="button">
+          <span aria-hidden="true">!</span>
+          Segurança
+        </button>
+
+        <div class="sidebar-section">
+          <label class="search-label" for="conversationSearch">Conversas</label>
+          <input id="conversationSearch" class="search-input" type="search" placeholder="Buscar conversas..." />
+        </div>
+        <div id="conversationList" class="conversation-list" aria-live="polite"></div>
+
+        <footer class="sidebar-footer">
+          <div class="local-profile">
+            <span class="profile-dot" aria-hidden="true"></span>
+            <div>
+              <strong>Local</strong>
+              <small>Modo seguro</small>
+            </div>
+          </div>
+          <a id="logoutBtn" class="logout-action" href="/login" onclick="localStorage.removeItem('agente_fino_authenticated'); localStorage.removeItem('nexus_authenticated')">Sair</a>
+        </footer>
+      </aside>
+
+      <section class="main-stage" aria-label="Chat do Agente Fino">
+        <button id="detailsBtn" class="technical-toggle" type="button" aria-label="Abrir painel tecnico" title="Painel tecnico">
+          <span aria-hidden="true"></span>
+        </button>
+
+        <section class="chat-area">
+          <div id="emptyState" class="empty-state">
+            <div class="center-orb" aria-hidden="true">
+              <img class="brand-symbol agent-center-symbol" src="/static/brand/agente-fino-symbol.png" alt="" />
+            </div>
+            <div class="empty-copy">
+              <p class="eyebrow">Agente Fino 1.0 Preview</p>
+              <h1>Ola, Pedro</h1>
+              <p>Diga o que precisa. Eu organizo, penso e resolvo.</p>
+            </div>
+            <div class="prompt-chips" aria-label="Sugestoes">
+              <button type="button" data-prompt="Criar uma estrategia">Criar uma estrategia</button>
+              <button type="button" data-prompt="Resolver um problema">Resolver um problema</button>
+              <button type="button" data-prompt="Pesquisar algo">Pesquisar algo</button>
+              <button type="button" data-prompt="Organizar uma ideia">Organizar uma ideia</button>
+            </div>
+          </div>
+          <div id="chatHistory" class="chat-history" aria-live="polite"></div>
+        </section>
+
+        <div id="activityIndicator" class="activity-indicator" hidden>
+          <span class="activity-dot" aria-hidden="true"></span>
+          <span id="activityText">Pensando...</span>
+          <button id="activityDetailsBtn" type="button">Atividade</button>
+        </div>
+
+        <form id="chatForm" class="composer">
+          <div class="composer-shell">
+            <button class="attach-btn" type="button" title="Anexos futuramente" aria-label="Anexos futuramente" disabled>+</button>
+            <textarea id="messageInput" rows="1" placeholder="Pergunte qualquer coisa..." required></textarea>
+            <button id="sendBtn" class="send-btn" type="submit" aria-label="Enviar mensagem">
+              <span class="send-label">Enviar</span>
+              <span class="send-icon" aria-hidden="true">-></span>
+            </button>
+          </div>
+          <div class="composer-footer">
+            <span>Enter envia - Shift+Enter quebra linha</span>
+            <span>Agente Fino pode cometer erros. Verifique informacoes importantes.</span>
+            <span id="latencyHint">pronto</span>
+          </div>
+        </form>
+      </section>
+
+      <aside id="detailsDrawer" class="details-drawer" aria-label="Painel tecnico" aria-hidden="true">
+        <div class="drawer-header">
+          <div>
+            <p class="eyebrow">Painel tecnico</p>
+            <h2>Controle interno</h2>
+          </div>
+          <button id="closeDetailsBtn" class="ghost-action" type="button">Fechar</button>
+        </div>
+
+        <section class="detail-block provider-grid" aria-label="Status tecnico">
+          <div><span>Modelo</span><strong id="modelStatus">--</strong></div>
+          <div><span>OpenAI/Gemini</span><strong id="geminiStatus">--</strong></div>
+          <div><span>Ollama</span><strong id="ollamaStatus">--</strong></div>
+          <div><span>Web</span><strong id="webStatus">--</strong></div>
+          <div><span>RAG</span><strong id="ragStatus">--</strong></div>
+          <div><span>Memoria</span><strong id="memoryStatus">--</strong></div>
+          <div><span>Seguranca</span><strong id="securityStatus">--</strong></div>
+          <div><span>MCP Brasil</span><strong id="mcpBrasilStatus">--</strong></div>
+        </section>
+
+        <section class="detail-block">
+          <h3>Resumo</h3>
+          <p id="providerNarrative"></p>
+          <div id="riskBox" class="detail-content"></div>
+        </section>
+
+        <section class="detail-block technical-actions">
+          <h3>Acoes ocultas</h3>
+          <button id="personalityBtn" type="button">Personalizar</button>
+          <button id="memoryBtn" type="button">Memoria</button>
+          <button id="logsBtn" type="button">Logs</button>
+          <button id="retestGeminiBtn" type="button">Retestar providers</button>
+          <button id="analyzePcBtn" type="button">Analisar PC</button>
+          <button id="deepResearchBtn" type="button">Pesquisa profunda</button>
+          <button id="darkforestBtn" type="button">Scanner de chaves</button>
+          <button id="mcpBrasilBtn" type="button">MCP Brasil</button>
+          <button id="matrixBtn" type="button">Matriz IA</button>
+          <button id="toolsBtn" type="button" aria-haspopup="true" aria-expanded="false" hidden>Ferramentas</button>
+          <div id="toolsMenu" class="tools-menu" role="menu" hidden></div>
+        </section>
+
+        <section class="detail-block">
+          <h3>Plano</h3>
+          <div id="planBox" class="detail-content"></div>
+        </section>
+
+        <section class="detail-block">
+          <h3>Ferramentas</h3>
+          <div id="actionsBox" class="detail-content"></div>
+        </section>
+
+        <section class="detail-block">
+          <h3>Fontes</h3>
+          <div id="sourcesBox" class="sources-list"></div>
+        </section>
+
+        <section class="detail-block">
+          <h3>Matriz IA</h3>
+          <div id="catalogBox" class="catalog-grid"></div>
+        </section>
+
+        <label class="switch sr-config">
+          <input id="useWebToggle" type="checkbox" checked />
+          <span></span>
+          Web automatica
+        </label>
+        <label class="switch sr-config">
+          <input id="pcContextToggle" type="checkbox" checked />
+          <span></span>
+          Contexto do PC
+        </label>
+      </aside>
+    </main>
+
+    <div id="memoryModal" class="modal" hidden>
+      <div class="modal-panel">
+        <header class="modal-header">
+          <div>
+            <p class="eyebrow">Memoria</p>
+            <h2>O que eu posso lembrar</h2>
+          </div>
+          <button class="ghost-action" type="button" data-close-modal="memoryModal">Fechar</button>
+        </header>
+        <div class="modal-grid">
+          <form id="memoryForm" class="stack-form">
+            <label>Categoria
+              <select id="memoryCategory">
+                <option value="user_preferences">preferencias</option>
+                <option value="style_preferences">estilo</option>
+                <option value="user_devices">dispositivos</option>
+                <option value="work_context">trabalho</option>
+                <option value="projects">projetos</option>
+                <option value="technical_environment">ambiente tecnico</option>
+                <option value="personal_goals">metas</option>
+              </select>
+            </label>
+            <label>Chave
+              <input id="memoryKey" type="text" placeholder="ex: notebook-principal" />
+            </label>
+            <label>Valor
+              <textarea id="memoryValue" rows="3" placeholder="O que o Agente Fino deve lembrar?"></textarea>
+            </label>
+            <button class="primary-action" type="submit">Salvar memoria</button>
+          </form>
+          <div>
+            <input id="memorySearch" class="search-input" type="search" placeholder="Buscar memorias..." />
+            <div id="memoryList" class="memory-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="personalityModal" class="modal" hidden>
+      <div class="modal-panel">
+        <header class="modal-header">
+          <div>
+            <p class="eyebrow">Personalidade</p>
+            <h2>Como devo responder</h2>
+          </div>
+          <button class="ghost-action" type="button" data-close-modal="personalityModal">Fechar</button>
+        </header>
+        <form id="personalityForm" class="personality-grid">
+          <label>Tom
+            <select id="personalityTone">
+              <option>parceiro fiel</option>
+              <option>tecnico formal</option>
+              <option>direto e frio</option>
+              <option>Harvey mode</option>
+              <option>descontraido</option>
+              <option>premium consultivo</option>
+              <option>professor iniciante</option>
+              <option>analista estrategico</option>
+            </select>
+          </label>
+          <label>Detalhe
+            <select id="personalityDetail">
+              <option>curto</option>
+              <option>equilibrado</option>
+              <option>completo</option>
+              <option>passo a passo</option>
+            </select>
+          </label>
+          <label>Emojis
+            <select id="personalityEmoji">
+              <option>nunca</option>
+              <option>pouco</option>
+              <option>moderado</option>
+              <option>livre</option>
+            </select>
+          </label>
+          <label>Estilo
+            <input id="personalityStyle" type="text" />
+          </label>
+          <label>Postura
+            <input id="personalityPosture" type="text" />
+          </label>
+          <label>Modo tecnico padrao
+            <select id="personalityTechnical">
+              <option>auto</option>
+              <option>sempre tecnico</option>
+              <option>somente quando pedido</option>
+            </select>
+          </label>
+          <label class="switch form-switch">
+            <input id="personalityAutoWeb" type="checkbox" />
+            <span></span>
+            Web automatica
+          </label>
+          <label class="switch form-switch">
+            <input id="personalityAutoMemory" type="checkbox" />
+            <span></span>
+            Memoria automatica
+          </label>
+          <div class="modal-actions">
+            <button class="primary-action" type="submit">Salvar</button>
+            <button id="resetPersonalityBtn" class="ghost-action" type="button">Restaurar padrao</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="/static/js/agent.js"></script>
+  </body>
+</html>

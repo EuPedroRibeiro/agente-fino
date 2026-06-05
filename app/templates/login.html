@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Agente Fino</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
+    <link rel="shortcut icon" href="/static/favicon.ico" />
+    <link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
+    <link rel="stylesheet" href="/static/css/agent.css" />
+  </head>
+  <body class="login-page">
+    <main class="login-shell">
+      <section class="login-hero" aria-label="Apresentacao do Agente Fino">
+        <a class="login-brand" href="/login" aria-label="Agente Fino">
+          <img class="brand-symbol-small login-brand-logo" src="/static/brand/agente-fino-symbol-reduced.png" alt="" aria-hidden="true" />
+          <strong>Agente <span>Fino</span></strong>
+        </a>
+        <div class="orb-field" aria-hidden="true">
+          <img class="brand-symbol hero-brand-symbol" src="/static/brand/agente-fino-symbol.png" alt="" />
+        </div>
+        <div class="hero-copy">
+          <img class="brand-logo-full login-full-logo" src="/static/brand/agente-fino-logo-full.png" alt="Agente Fino" />
+          <p class="eyebrow">Agente Fino 1.0 Preview</p>
+          <h1>Sua IA pessoal para pensar, organizar e resolver.</h1>
+          <p>Um app limpo, rapido e poderoso por tras da tela. Conversa natural na frente, inteligencia tecnica quando voce chamar.</p>
+        </div>
+        <div class="login-points" aria-label="Diferenciais">
+          <span>IA conversacional</span>
+          <span>Modo local seguro</span>
+          <span>Ferramentas sob controle</span>
+        </div>
+      </section>
+
+      <section class="login-card" aria-label="Entrar no Agente Fino">
+        <div class="card-brand">
+          <img class="brand-symbol-small large" src="/static/brand/agente-fino-symbol-reduced.png" alt="" aria-hidden="true" />
+          <div>
+            <strong>Agente <span>Fino</span></strong>
+            <small>Modo local seguro</small>
+          </div>
+        </div>
+        <h2>Entrar</h2>
+        <p>Acesse o seu ambiente local e continue pelo chat principal.</p>
+        <a
+          id="enterAgenteFinoBtn"
+          class="login-action primary-action"
+          href="/agent"
+          onclick="localStorage.setItem('agente_fino_authenticated', 'true'); localStorage.setItem('nexus_authenticated', 'true')"
+        >Entrar</a>
+        <p class="safe-note">Modo local seguro - 127.0.0.1</p>
+      </section>
+    </main>
+    <script>
+      const enterButton = document.querySelector("#enterAgenteFinoBtn");
+      enterButton?.addEventListener("click", async (event) => {
+        event.preventDefault();
+        enterButton.setAttribute("aria-busy", "true");
+        try {
+          const response = await fetch("/api/auth/login", { method: "POST" });
+          if (!response.ok) throw new Error("Falha ao criar sessao local.");
+          localStorage.setItem('agente_fino_authenticated', 'true');
+          localStorage.setItem('nexus_authenticated', 'true');
+          window.location.href = "/agent";
+        } catch (error) {
+          enterButton.removeAttribute("aria-busy");
+          alert(error.message || "Nao foi possivel entrar agora.");
+        }
+      });
+    </script>
+  </body>
+</html>
