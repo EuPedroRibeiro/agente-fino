@@ -103,7 +103,7 @@ class MCPBrasilModuleTests(unittest.TestCase):
     def test_mcp_failure_does_not_break_chat_response(self) -> None:
         core = NexusCore()
         core.mcp_brasil = FailingMCPBrasilService()
-        response = core.chat(AgentChatRequest(message="Busque dados publicos sobre deputados do RJ"))
+        response = core.chat(AgentChatRequest(message="Busque contrato publico no TCU"))
         self.assertEqual(response.mode, "MCP_BRASIL")
         self.assertIn("nao consegui acessar", response.final_answer)
         self.assertEqual(response.model_used["provider"], "mcp-brasil")

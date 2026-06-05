@@ -33,6 +33,7 @@ PROTECTED_PREFIXES = (
     "/api/processes",
     "/api/security/",
     "/api/mcp-brasil/",
+    "/api/public-data/",
     "/api/status",
     "/api/admin/",
 )

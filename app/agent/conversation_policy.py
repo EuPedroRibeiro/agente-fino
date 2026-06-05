@@ -53,6 +53,7 @@ CONVERSATION_INTENTS = {
     "cpf_lookup",
     "cpf_validate",
     "cnpj_lookup",
+    "public_data_query",
     "disk_usage",
     "printer_support",
     "network_support",
@@ -121,6 +122,7 @@ TECHNICAL_INTENTS = {
     "cpf_lookup",
     "cpf_validate",
     "cnpj_lookup",
+    "public_data_query",
     "disk_usage",
     "printer_support",
     "network_support",
@@ -148,6 +150,7 @@ TOOL_INTENTS = {
     "cpf_lookup": "document_lookup",
     "cpf_validate": "cpf_validate_local",
     "cnpj_lookup": "document_lookup",
+    "public_data_query": "public_data",
 }
 
 INTENT_RULES = {
@@ -187,6 +190,7 @@ INTENT_RULES = {
     "cpf_lookup": {"category": "authorized_document_lookup", "style": "consulta autorizada direta com documento mascarado", "needs_web": False, "needs_tool": True},
     "cpf_validate": {"category": "authorized_document_lookup", "style": "validacao local objetiva com documento mascarado", "needs_web": False, "needs_tool": True},
     "cnpj_lookup": {"category": "authorized_document_lookup", "style": "consulta autorizada direta com documento mascarado", "needs_web": False, "needs_tool": True},
+    "public_data_query": {"category": "public_data", "style": "consulta direta a fonte publica oficial, com limites claros", "needs_web": False, "needs_tool": True},
     "disk_usage": {"category": "storage", "style": "ranking objetivo e seguro", "needs_web": False, "needs_tool": True},
     "printer_support": {"category": "printer", "style": "tecnico e orientado a verificacoes", "needs_web": False, "needs_tool": True},
     "network_support": {"category": "network", "style": "tecnico e orientado a teste", "needs_web": False, "needs_tool": True},

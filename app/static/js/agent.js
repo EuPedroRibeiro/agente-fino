@@ -32,6 +32,7 @@ const ui = {
   ragStatus: document.querySelector("#ragStatus"),
   memoryStatus: document.querySelector("#memoryStatus"),
   securityStatus: document.querySelector("#securityStatus"),
+  publicDataStatus: document.querySelector("#publicDataStatus"),
   mcpBrasilStatus: document.querySelector("#mcpBrasilStatus"),
   providerNarrative: document.querySelector("#providerNarrative"),
   catalogBox: document.querySelector("#catalogBox"),
@@ -527,10 +528,11 @@ async function confirmAction(actionId) {
 }
 
 async function loadStatus() {
-  const [agentStatus, providerStatus, securityStatus, mcpBrasilStatus] = await Promise.allSettled([
+  const [agentStatus, providerStatus, securityStatus, publicDataStatus, mcpBrasilStatus] = await Promise.allSettled([
     fetch("/api/agent/status").then((response) => response.json()),
     fetch("/api/agent/providers/status").then((response) => response.json()),
     fetch("/api/security/status").then((response) => response.json()),
+    fetch("/api/public-data/status").then((response) => response.json()),
     fetch("/api/mcp-brasil/status").then((response) => response.json()),
   ]);
   if (providerStatus.status === "fulfilled") {
@@ -549,6 +551,10 @@ async function loadStatus() {
     ui.securityStatus.textContent = sec.enabled
       ? `ativa | CSRF ${sec.csrf_enabled ? "on" : "off"} | rate ${sec.rate_limit_enabled ? "on" : "off"}`
       : "inativa";
+  }
+  if (publicDataStatus.status === "fulfilled" && ui.publicDataStatus) {
+    const publicData = publicDataStatus.value;
+    ui.publicDataStatus.textContent = publicData.active ? "ativo" : "inativo";
   }
   if (mcpBrasilStatus.status === "fulfilled" && ui.mcpBrasilStatus) {
     const mcp = mcpBrasilStatus.value;

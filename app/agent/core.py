@@ -17,6 +17,7 @@ from app.agent.observability import langfuse_status, record_run
 from app.agent.orchestrator import AgentOrchestrator
 from app.agent.personality import get_personality, reset_personality, update_personality
 from app.agent.providers.model_router import ModelRouter
+from app.agent.public_data_router import PublicDataRouter
 from app.agent.router import classify_message
 from app.agent.schemas.evidence import EvidenceItem, SourceCitation
 from app.agent.schemas.agent_response import AgentResponse
@@ -28,6 +29,7 @@ from app.core.production import production_config_errors
 from app.core.runtime import is_cloud
 from app.db import get_database_status
 from app.services.document_lookup import DocumentLookupService
+from app.services.public_data import PublicDataService
 from modules.mcp_brasil import MCPBrasilRouter, MCPBrasilService
 
 
@@ -67,6 +69,7 @@ class NexusCore:
         self.model_router = ModelRouter()
         self.mcp_brasil = MCPBrasilService()
         self.document_lookup = DocumentLookupService()
+        self.public_data = PublicDataService()
 
     def chat(self, request: AgentChatRequest) -> AgentResponse:
         started = time.perf_counter()
@@ -98,9 +101,13 @@ class NexusCore:
                     "fallback_reason": "; ".join(config_errors),
                 }
                 return self._to_response(state)
+            if PublicDataRouter.is_parliamentary_expense_query(request.message):
+                return self._chat_with_public_data(request, started)
             document_result = self.document_lookup.handle(request.message, user_id=request.user_id)
             if document_result:
                 return self._chat_with_document_lookup(request, document_result, started)
+            if PublicDataRouter.should_use_public_data(request.message):
+                return self._chat_with_public_data(request, started)
             if MCPBrasilRouter.should_use_mcp_brasil(request.message):
                 return self._chat_with_mcp_brasil(request, started)
             route = classify_message(request.message)
@@ -310,6 +317,83 @@ class NexusCore:
         record_run(state, latency_ms=latency_ms, success=True, error=None)
         return self._to_response(state)
 
+    def _chat_with_public_data(self, request: AgentChatRequest, started: float) -> AgentResponse:
+        result = self.public_data.ask(request.message, user=request.user_id or settings.admin_user)
+        latency_ms = int((time.perf_counter() - started) * 1000)
+        tool_name = result.get("tool") or "public_data"
+        source_url = result.get("source_url") or "https://github.com/GusFurtado/DadosAbertosBrasil"
+        state = AgentState(
+            conversation_id=request.conversation_id or str(uuid4()),
+            user_id=request.user_id,
+            user_message=request.message,
+            intent="public_data_query",
+            category="public_data",
+            mode="PUBLIC_DATA",
+            final_answer=result.get("answer") or "Nao consegui concluir a consulta de dados publicos.",
+            selected_tools=[tool_name] if tool_name else [],
+            tool_calls=[
+                {
+                    "name": tool_name,
+                    "status": result.get("status"),
+                    "arguments": result.get("arguments") or {},
+                    "latency_ms": result.get("latency_ms") or latency_ms,
+                    "result": {"topic": result.get("topic"), "status": result.get("status")},
+                }
+            ],
+            evidence=[
+                EvidenceItem(
+                    source_type="public_data",
+                    title="DadosAbertosBrasil/PublicDataProvider",
+                    content=str(result.get("answer") or "")[:1200],
+                    score=0.94,
+                    metadata={"tool": tool_name, "topic": result.get("topic"), "status": result.get("status")},
+                )
+            ],
+            citations=[
+                SourceCitation(
+                    title="Fonte publica oficial",
+                    url=source_url,
+                    domain=source_url.split("/")[2] if "://" in source_url else "dados-publicos",
+                    reliability="high",
+                    used_for="dados publicos brasileiros",
+                    excerpt="Consulta executada por adaptador publico sem chave de API.",
+                )
+            ] if result.get("web_used") else [],
+            web_used=bool(result.get("web_used")),
+            web_status={
+                "used": bool(result.get("web_used")),
+                "provider": "public-data",
+                "sources_read": 1 if result.get("web_used") else 0,
+            },
+            rag_status={"used": False, "skipped": "public_data_provider"},
+            model_used={
+                "provider": "public-data",
+                "model": "DadosAbertosBrasil/PublicDataProvider",
+                "used_model": False,
+                "llm_used": False,
+                "mode": "PUBLIC_DATA",
+                "tool": tool_name,
+            },
+            risk_level="low",
+            confidence=0.94 if result.get("status") == "ok" else 0.65,
+            warnings=[] if result.get("status") == "ok" else ["A fonte publica nao concluiu integralmente a consulta."],
+            timings_ms={"total": latency_ms, "public_data": int(result.get("latency_ms") or latency_ms)},
+        )
+        conversation_logs.add_message(conversation_id=state.conversation_id, role="user", content=state.user_message)
+        conversation_logs.add_message(
+            conversation_id=state.conversation_id,
+            role="assistant",
+            content=state.final_answer,
+            provider="public-data",
+            model="DadosAbertosBrasil/PublicDataProvider",
+            intent=state.intent,
+            tools_used=state.selected_tools,
+            web_sources_count=len(state.citations),
+            latency_ms=latency_ms,
+        )
+        record_run(state, latency_ms=latency_ms, success=result.get("status") == "ok", error=result.get("error"))
+        return self._to_response(state)
+
     def research(self, request: ResearchRequest) -> dict:
         research = perform_web_research(request.query, official_first=request.official_first, max_results=request.max_results)
         return {
@@ -384,6 +468,7 @@ class NexusCore:
             "catalog_summary": catalog["summary"],
             "provider": self.model_router.status(),
             "mcp_brasil": self.mcp_brasil.status(),
+            "public_data": self.public_data.status(),
             "document_lookup": self.document_lookup.status(),
             "tools": list_tools(),
             "observability": langfuse_status(),
@@ -395,6 +480,7 @@ class NexusCore:
     def providers_status(self) -> dict:
         status = self.model_router.status()
         status["document_lookup"] = self.document_lookup.status()
+        status["public_data"] = self.public_data.status()
         return status
 
     def retest_gemini(self) -> dict:

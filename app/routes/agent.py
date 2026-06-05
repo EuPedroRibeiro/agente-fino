@@ -14,6 +14,7 @@ from app.agent.intelligence.autonomy import autonomy_status
 from app.agent.intelligence.learning_store import LearningStore
 from app.agent.intelligence.task_manager import create_task, list_tasks
 from app.agent.memory_graph import add_node, search_nodes
+from app.agent.public_data_router import PublicDataRouter
 from app.agent.router import classify_message
 from app.agent.security.sanitizer import mask_secrets
 from app.agent.schemas.messages import (
@@ -90,6 +91,8 @@ def _activity_message_for_route(route: dict) -> str:
         return "Pesquisando na web..."
     if intent == "mcp_brasil":
         return "Consultando dados publicos brasileiros..."
+    if intent == "public_data_query":
+        return "Consultando fonte publica oficial..."
     return "Analisando pedido..."
 
 
@@ -301,7 +304,15 @@ def agent_run_events(run_id: str) -> StreamingResponse:
         payload: AgentChatRequest = run["payload"]
         try:
             route = classify_message(payload.message)
-            if route.get("intent") not in {"cpf_lookup", "cpf_validate", "cnpj_lookup"} and MCPBrasilRouter.should_use_mcp_brasil(payload.message):
+            if PublicDataRouter.should_use_public_data(payload.message):
+                plan = PublicDataRouter.plan_query(payload.message)
+                route = {
+                    "intent": "public_data_query",
+                    "category": "public_data",
+                    "topic": plan.topic,
+                    "tool": plan.tool_name,
+                }
+            elif route.get("intent") not in {"cpf_lookup", "cpf_validate", "cnpj_lookup"} and MCPBrasilRouter.should_use_mcp_brasil(payload.message):
                 plan = MCPBrasilRouter.plan_query(payload.message)
                 route = {"intent": "mcp_brasil", "category": "public_data_br", "tool": plan.tool_name}
             yield _sse("run_started", {"run_id": run_id, "message": "Pensando..."})
@@ -325,6 +336,11 @@ def agent_run_events(run_id: str) -> StreamingResponse:
                 yield _sse(
                     "web_search_started",
                     {"run_id": run_id, "message": "Consultando dados publicos brasileiros via MCP Brasil...", "tool": route.get("tool")},
+                )
+            if route.get("intent") == "public_data_query":
+                yield _sse(
+                    "web_search_started",
+                    {"run_id": run_id, "message": "Consultando fonte publica oficial...", "tool": route.get("tool")},
                 )
 
             response = core.chat(payload)

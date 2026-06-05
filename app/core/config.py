@@ -118,6 +118,8 @@ class Settings(BaseModel):
     mcp_brasil_timeout: int = Field(default_factory=lambda: int(os.getenv("MCP_BRASIL_TIMEOUT", "60")))
     mcp_brasil_allowed_features: str = Field(default_factory=lambda: os.getenv("MCP_BRASIL_ALLOWED_FEATURES", ""))
     mcp_brasil_datasets: str = Field(default_factory=lambda: os.getenv("MCP_BRASIL_DATASETS", ""))
+    public_data_enabled: bool = Field(default_factory=lambda: os.getenv("PUBLIC_DATA_ENABLED", "true").lower() == "true")
+    public_data_timeout_seconds: float = Field(default_factory=lambda: float(os.getenv("PUBLIC_DATA_TIMEOUT_SECONDS", "15")))
     document_lookup_enabled: bool = Field(default_factory=lambda: os.getenv("DOCUMENT_LOOKUP_ENABLED", "false").lower() == "true")
     document_lookup_base_url: str = Field(default_factory=lambda: os.getenv("DOCUMENT_LOOKUP_BASE_URL", ""))
     document_lookup_api_key: str = Field(default_factory=lambda: os.getenv("DOCUMENT_LOOKUP_API_KEY", ""))

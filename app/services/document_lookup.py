@@ -96,7 +96,14 @@ class DocumentLookupService:
                 )
             except DocumentLookupError as exc:
                 error = mask_secrets(str(exc))
-                answers.append(f"Nao consegui consultar {document_type.upper()} {masked} agora. {error}")
+                if document_type == "cpf" and "nao configurado" in error.lower():
+                    answers.append(
+                        f"Nao consegui consultar CPF {masked} agora. "
+                        "DadosAbertosBrasil nao fornece consulta livre de CPF; "
+                        "o provider documental autorizado nao esta configurado."
+                    )
+                else:
+                    answers.append(f"Nao consegui consultar {document_type.upper()} {masked} agora. {error}")
                 history.append(f"Consulta autorizada falhou para {document_type.upper()} {masked}.")
                 statuses.append("error")
                 self.auditor(

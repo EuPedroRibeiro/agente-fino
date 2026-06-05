@@ -5,6 +5,7 @@ import unicodedata
 
 from app.agent.calculator import looks_like_calculation
 from app.agent.conversation_policy import NO_WEB_KEYWORDS, WEB_TRIGGER_KEYWORDS, should_force_web
+from app.agent.public_data_router import PublicDataRouter
 from app.security.documents import classify_document_request
 from app.services.folder_size import resolve_folder_target
 
@@ -25,6 +26,7 @@ LOCAL_METRIC_INTENTS = {
     "cpf_lookup",
     "cpf_validate",
     "cnpj_lookup",
+    "public_data_query",
 }
 SIMPLE_INTENTS = {"greeting", "casual_chat", "time_query", "date_query", "identity_query"}
 DIRECT_INTENTS = SIMPLE_INTENTS | LOCAL_METRIC_INTENTS | {"calculation_query"}
@@ -74,6 +76,14 @@ def classify_message(message: str) -> dict:
     document_route = classify_document_request(message)
     if document_route:
         return document_route
+    if PublicDataRouter.should_use_public_data(message):
+        plan = PublicDataRouter.plan_query(message)
+        return {
+            "intent": "public_data_query",
+            "category": "public_data",
+            "topic": plan.topic,
+            "tool": plan.tool_name,
+        }
 
     if _asks_memory_save(text):
         return {"intent": "memory_save", "category": "memory"}
