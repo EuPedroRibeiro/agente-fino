@@ -7,9 +7,13 @@ from pathlib import Path
 class NavigationFlowTests(unittest.TestCase):
     def test_login_enters_agent(self) -> None:
         html = Path("app/templates/login.html").read_text(encoding="utf-8")
+        js = Path("app/static/js/login.js").read_text(encoding="utf-8")
         self.assertIn("Agente Fino", html)
         self.assertIn("Entrar", html)
-        self.assertIn("localStorage.setItem('agente_fino_authenticated', 'true')", html)
+        self.assertIn('type="password"', html)
+        self.assertIn('/static/js/login.js', html)
+        self.assertIn('body: JSON.stringify({ password })', js)
+        self.assertIn('localStorage.setItem("agente_fino_authenticated", "true")', js)
         self.assertIn('href="/agent"', html)
 
     def test_root_redirects_to_agent_or_login(self) -> None:

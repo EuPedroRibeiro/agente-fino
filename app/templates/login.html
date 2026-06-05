@@ -8,6 +8,7 @@
     <link rel="shortcut icon" href="/static/favicon.ico" />
     <link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
     <link rel="stylesheet" href="/static/css/agent.css" />
+    <script src="/static/js/login.js" defer></script>
   </head>
   <body class="login-page">
     <main class="login-shell">
@@ -27,7 +28,7 @@
         </div>
         <div class="login-points" aria-label="Diferenciais">
           <span>IA conversacional</span>
-          <span>Modo local seguro</span>
+          <span>Modo cloud seguro</span>
           <span>Ferramentas sob controle</span>
         </div>
       </section>
@@ -37,36 +38,28 @@
           <img class="brand-symbol-small large" src="/static/brand/agente-fino-symbol-reduced.png" alt="" aria-hidden="true" />
           <div>
             <strong>Agente <span>Fino</span></strong>
-            <small>Modo local seguro</small>
+            <small>Modo cloud seguro</small>
           </div>
         </div>
         <h2>Entrar</h2>
-        <p>Acesse o seu ambiente local e continue pelo chat principal.</p>
-        <a
-          id="enterAgenteFinoBtn"
-          class="login-action primary-action"
-          href="/agent"
-          onclick="localStorage.setItem('agente_fino_authenticated', 'true'); localStorage.setItem('nexus_authenticated', 'true')"
-        >Entrar</a>
-        <p class="safe-note">Modo local seguro - 127.0.0.1</p>
+        <p>Acesse seu ambiente seguro e continue pelo chat principal.</p>
+        <form id="loginForm" class="login-form" action="/agent" method="post" data-href="/agent" novalidate>
+          <label class="login-field" for="passwordInput">
+            <span>Senha</span>
+            <input
+              id="passwordInput"
+              name="password"
+              type="password"
+              placeholder="Senha de acesso"
+              autocomplete="current-password"
+              required
+            />
+          </label>
+          <button id="enterAgenteFinoBtn" class="login-action primary-action" type="submit">Entrar</button>
+          <p id="loginError" class="login-error" role="alert" aria-live="polite"></p>
+        </form>
+        <p class="safe-note">Modo cloud seguro</p>
       </section>
     </main>
-    <script>
-      const enterButton = document.querySelector("#enterAgenteFinoBtn");
-      enterButton?.addEventListener("click", async (event) => {
-        event.preventDefault();
-        enterButton.setAttribute("aria-busy", "true");
-        try {
-          const response = await fetch("/api/auth/login", { method: "POST" });
-          if (!response.ok) throw new Error("Falha ao criar sessao local.");
-          localStorage.setItem('agente_fino_authenticated', 'true');
-          localStorage.setItem('nexus_authenticated', 'true');
-          window.location.href = "/agent";
-        } catch (error) {
-          enterButton.removeAttribute("aria-busy");
-          alert(error.message || "Nao foi possivel entrar agora.");
-        }
-      });
-    </script>
   </body>
 </html>
