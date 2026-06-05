@@ -25,6 +25,7 @@ LOCAL_METRIC_INTENTS = {
     "language_correction",
     "cpf_lookup",
     "cpf_validate",
+    "cpf_lab_lookup",
     "cnpj_lookup",
     "public_data_query",
 }

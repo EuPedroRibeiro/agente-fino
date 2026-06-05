@@ -66,12 +66,35 @@ def validate_cpf(value: str) -> bool:
     return True
 
 
+def validate_cnpj(value: str) -> bool:
+    digits = digits_only(value)
+    if len(digits) != 14 or digits == digits[0] * 14:
+        return False
+    for length, weights in (
+        (12, (5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2)),
+        (13, (6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2)),
+    ):
+        total = sum(int(digits[index]) * weights[index] for index in range(length))
+        remainder = total % 11
+        check = 0 if remainder < 2 else 11 - remainder
+        if check != int(digits[length]):
+            return False
+    return True
+
+
 def classify_document_request(message: str) -> dict[str, Any] | None:
     normalized = _normalize(message)
     cpfs = extract_cpfs(message)
     cnpjs = extract_cnpjs(message)
 
     if cpfs and "cpf" in normalized:
+        if any(term in normalized for term in ("simular", "simulacao", "modo laboratorio", "laboratorio", "estudo")):
+            return {
+                "intent": "cpf_lab_lookup",
+                "category": "document_lab",
+                "documents": cpfs,
+                "document_type": "cpf",
+            }
         validation_terms = ("validar", "valide", "validacao", "e valido", "eh valido", "cpf valido")
         intent = "cpf_validate" if any(term in normalized for term in validation_terms) else "cpf_lookup"
         return {"intent": intent, "category": "authorized_document_lookup", "documents": cpfs, "document_type": "cpf"}
@@ -81,7 +104,7 @@ def classify_document_request(message: str) -> dict[str, Any] | None:
 
 
 def is_clear_cpf_abuse(message: str, cpfs: list[str]) -> bool:
-    if len(cpfs) > 5:
+    if len(cpfs) > 1:
         return True
     normalized = _normalize(message)
     automated_terms = (

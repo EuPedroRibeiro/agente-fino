@@ -131,6 +131,14 @@ class Settings(BaseModel):
     document_lookup_api_key_prefix: str = Field(default_factory=lambda: os.getenv("DOCUMENT_LOOKUP_API_KEY_PREFIX", "Bearer "))
     cpf_lookup_rate_limit_per_hour: int = Field(default_factory=lambda: max(1, int(os.getenv("CPF_LOOKUP_RATE_LIMIT_PER_HOUR", "100"))))
     cnpj_lookup_rate_limit_per_hour: int = Field(default_factory=lambda: max(1, int(os.getenv("CNPJ_LOOKUP_RATE_LIMIT_PER_HOUR", "300"))))
+    sherlock_enabled: bool = Field(default_factory=lambda: os.getenv("SHERLOCK_ENABLED", "true").lower() == "true")
+    sherlock_cpf_lab_enabled: bool = Field(default_factory=lambda: os.getenv("SHERLOCK_CPF_LAB_ENABLED", "true").lower() == "true")
+    cnpj_lookup_enabled: bool = Field(default_factory=lambda: os.getenv("CNPJ_LOOKUP_ENABLED", "true").lower() == "true")
+    cnpj_lookup_provider: str = Field(default_factory=lambda: os.getenv("CNPJ_LOOKUP_PROVIDER", "brasilapi").strip().lower())
+    cnpj_lookup_timeout_seconds: float = Field(default_factory=lambda: float(os.getenv("CNPJ_LOOKUP_TIMEOUT_SECONDS", "10")))
+    cnpj_cache_ttl_seconds: int = Field(default_factory=lambda: max(60, int(os.getenv("CNPJ_CACHE_TTL_SECONDS", "21600"))))
+    redis_url: str = Field(default_factory=lambda: os.getenv("REDIS_URL", ""))
+    consulta_cache_enabled: bool = Field(default_factory=lambda: os.getenv("CONSULTA_CACHE_ENABLED", "true").lower() == "true")
 
 
 settings = Settings()

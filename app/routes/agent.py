@@ -77,6 +77,8 @@ def _activity_message_for_route(route: dict) -> str:
     path = route.get("path")
     if intent == "cpf_validate":
         return "Validando CPF localmente..."
+    if intent == "cpf_lab_lookup":
+        return "Preparando simulacao segura..."
     if intent == "cpf_lookup":
         return "Consultando CPF na fonte autorizada..."
     if intent == "cnpj_lookup":
@@ -312,7 +314,7 @@ def agent_run_events(run_id: str) -> StreamingResponse:
                     "topic": plan.topic,
                     "tool": plan.tool_name,
                 }
-            elif route.get("intent") not in {"cpf_lookup", "cpf_validate", "cnpj_lookup"} and MCPBrasilRouter.should_use_mcp_brasil(payload.message):
+            elif route.get("intent") not in {"cpf_lookup", "cpf_validate", "cpf_lab_lookup", "cnpj_lookup"} and MCPBrasilRouter.should_use_mcp_brasil(payload.message):
                 plan = MCPBrasilRouter.plan_query(payload.message)
                 route = {"intent": "mcp_brasil", "category": "public_data_br", "tool": plan.tool_name}
             yield _sse("run_started", {"run_id": run_id, "message": "Pensando..."})
@@ -328,7 +330,7 @@ def agent_run_events(run_id: str) -> StreamingResponse:
             )
             if route.get("intent") in {"folder_size", "file_count", "folder_usage_top"}:
                 yield _sse("local_tool_started", {"run_id": run_id, "message": _activity_message_for_route(route)})
-            if route.get("intent") in {"cpf_lookup", "cpf_validate", "cnpj_lookup"}:
+            if route.get("intent") in {"cpf_lookup", "cpf_validate", "cpf_lab_lookup", "cnpj_lookup"}:
                 yield _sse("local_tool_started", {"run_id": run_id, "message": _activity_message_for_route(route)})
             if route.get("intent") in {"web_research", "deep_web_research"}:
                 yield _sse("web_search_started", {"run_id": run_id, "message": "Pesquisando na web..."})

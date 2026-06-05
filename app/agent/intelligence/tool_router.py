@@ -20,6 +20,8 @@ def tools_for_intent(intent: str, message: str = "") -> list[str]:
         tools.append("document_lookup")
     if intent == "cpf_validate":
         tools.append("cpf_validate_local")
+    if intent == "cpf_lab_lookup":
+        tools.append("cpf_lab_simulation")
     if intent == "public_data_query":
         tools.append("public_data")
     if intent in {"pc_diagnostic", "analyze_pc", "report_analysis"} or "analise este pc" in text:

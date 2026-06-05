@@ -12,7 +12,7 @@ from app.core.logging_db import init_db
 from app.core.production import production_config_errors
 from app.core.runtime import is_cloud
 from app.db.migrations import init_database_layer
-from app.routes import actions, agent, darkforest, dashboard, logs, mcp_brasil, public_data, report, status
+from app.routes import actions, agent, darkforest, dashboard, logs, mcp_brasil, public_data, report, sherlock, status
 from app.security.access import AuthRequiredMiddleware
 from app.security.config import security_settings
 from app.security.csrf import CsrfProtectionMiddleware
@@ -66,6 +66,7 @@ def create_app() -> FastAPI:
     app.include_router(darkforest.router)
     app.include_router(mcp_brasil.router)
     app.include_router(public_data.router)
+    app.include_router(sherlock.router)
     app.include_router(dashboard.router)
     app.include_router(status.router)
     if not is_cloud():

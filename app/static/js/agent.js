@@ -8,6 +8,7 @@ const ui = {
   analyzePcBtn: document.querySelector("#analyzePcBtn"),
   deepResearchBtn: document.querySelector("#deepResearchBtn"),
   darkforestBtn: document.querySelector("#darkforestBtn"),
+  sherlockBtn: document.querySelector("#sherlockBtn"),
   securityShortcutBtn: document.querySelector("#securityShortcutBtn"),
   mcpBrasilBtn: document.querySelector("#mcpBrasilBtn"),
   retestGeminiBtn: document.querySelector("#retestGeminiBtn"),
@@ -33,6 +34,11 @@ const ui = {
   memoryStatus: document.querySelector("#memoryStatus"),
   securityStatus: document.querySelector("#securityStatus"),
   publicDataStatus: document.querySelector("#publicDataStatus"),
+  sherlockStatus: document.querySelector("#sherlockStatus"),
+  sherlockCpfStatus: document.querySelector("#sherlockCpfStatus"),
+  sherlockCpfLabStatus: document.querySelector("#sherlockCpfLabStatus"),
+  sherlockCnpjStatus: document.querySelector("#sherlockCnpjStatus"),
+  sherlockCacheStatus: document.querySelector("#sherlockCacheStatus"),
   mcpBrasilStatus: document.querySelector("#mcpBrasilStatus"),
   providerNarrative: document.querySelector("#providerNarrative"),
   catalogBox: document.querySelector("#catalogBox"),
@@ -528,11 +534,12 @@ async function confirmAction(actionId) {
 }
 
 async function loadStatus() {
-  const [agentStatus, providerStatus, securityStatus, publicDataStatus, mcpBrasilStatus] = await Promise.allSettled([
+  const [agentStatus, providerStatus, securityStatus, publicDataStatus, sherlockStatus, mcpBrasilStatus] = await Promise.allSettled([
     fetch("/api/agent/status").then((response) => response.json()),
     fetch("/api/agent/providers/status").then((response) => response.json()),
     fetch("/api/security/status").then((response) => response.json()),
     fetch("/api/public-data/status").then((response) => response.json()),
+    fetch("/api/sherlock/status").then((response) => response.json()),
     fetch("/api/mcp-brasil/status").then((response) => response.json()),
   ]);
   if (providerStatus.status === "fulfilled") {
@@ -555,6 +562,14 @@ async function loadStatus() {
   if (publicDataStatus.status === "fulfilled" && ui.publicDataStatus) {
     const publicData = publicDataStatus.value;
     ui.publicDataStatus.textContent = publicData.active ? "ativo" : "inativo";
+  }
+  if (sherlockStatus.status === "fulfilled") {
+    const sherlock = sherlockStatus.value;
+    if (ui.sherlockStatus) ui.sherlockStatus.textContent = sherlock.active ? "ativo" : "inativo";
+    if (ui.sherlockCpfStatus) ui.sherlockCpfStatus.textContent = sherlock.cpf_real || "--";
+    if (ui.sherlockCpfLabStatus) ui.sherlockCpfLabStatus.textContent = sherlock.cpf_lab || "--";
+    if (ui.sherlockCnpjStatus) ui.sherlockCnpjStatus.textContent = sherlock.cnpj_provider || "--";
+    if (ui.sherlockCacheStatus) ui.sherlockCacheStatus.textContent = sherlock.redis_cache || sherlock.cache_backend || "--";
   }
   if (mcpBrasilStatus.status === "fulfilled" && ui.mcpBrasilStatus) {
     const mcp = mcpBrasilStatus.value;
@@ -839,6 +854,9 @@ on(ui.analyzePcBtn, "click", () => analyzePc());
 on(ui.deepResearchBtn, "click", () => deepResearch().catch((error) => addMessage("agent", error.message)));
 on(ui.darkforestBtn, "click", () => {
   window.location.href = "/security";
+});
+on(ui.sherlockBtn, "click", () => {
+  window.location.href = "/sherlock";
 });
 on(ui.securityShortcutBtn, "click", () => {
   window.location.href = "/security";

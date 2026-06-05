@@ -207,7 +207,7 @@ class NexusCore:
             web_status={"used": False, "skipped": "authorized_document_provider"},
             rag_status={"used": False, "skipped": "authorized_document_provider"},
             model_used={
-                "provider": "local" if tool == "cpf_validate_local" else "document-lookup",
+                "provider": "local" if tool in {"cpf_validate_local", "cpf_lab_simulation"} else "document-lookup",
                 "model": tool,
                 "used_model": False,
                 "llm_used": False,

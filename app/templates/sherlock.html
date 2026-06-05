@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sherlock Consultas - Agente Fino</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
+    <link rel="shortcut icon" href="/static/favicon.ico" />
+    <link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
+    <link rel="stylesheet" href="/static/css/agent.css" />
+    <link rel="stylesheet" href="/static/css/sherlock.css" />
+    <script>
+      const agenteFinoAuthenticated =
+        localStorage.getItem("agente_fino_authenticated") === "true" ||
+        localStorage.getItem("nexus_authenticated") === "true";
+      if (!agenteFinoAuthenticated) window.location.replace("/login");
+    </script>
+  </head>
+  <body class="sherlock-page">
+    <main class="sherlock-shell">
+      <nav class="sherlock-nav" aria-label="Navegacao Sherlock">
+        <a class="sherlock-brand" href="/agent">
+          <img class="brand-symbol-small" src="/static/brand/agente-fino-symbol-reduced.png" alt="" aria-hidden="true" />
+          <span>Agente <strong>Fino</strong></span>
+        </a>
+        <div class="sherlock-nav-actions">
+          <span id="sherlockTopStatus" class="sherlock-status-pill">Carregando status...</span>
+          <a class="sherlock-ghost-link" href="/agent">Voltar ao chat</a>
+        </div>
+      </nav>
+
+      <section class="sherlock-hero">
+        <div>
+          <p class="eyebrow">OSINT Brasil</p>
+          <h1>Sherlock Consultas</h1>
+          <p>Consulta documental e dados publicos com validacao local, laboratorio seguro e providers configuraveis.</p>
+        </div>
+        <div class="sherlock-mark" aria-hidden="true">
+          <span></span>
+        </div>
+      </section>
+
+      <section class="sherlock-workspace">
+        <form id="sherlockForm" class="sherlock-query-card">
+          <div class="query-heading">
+            <div>
+              <p class="eyebrow">Consulta unica</p>
+              <h2>CPF ou CNPJ</h2>
+            </div>
+            <span class="privacy-chip">Historico mascarado</span>
+          </div>
+          <label for="sherlockDocument">Documento</label>
+          <div class="sherlock-input-row">
+            <input id="sherlockDocument" inputmode="numeric" autocomplete="off" maxlength="24" placeholder="Digite CPF ou CNPJ" />
+            <button id="sherlockQueryBtn" class="sherlock-primary" type="submit">Consultar</button>
+          </div>
+          <div class="sherlock-actions">
+            <button id="validateCpfBtn" type="button">Validar CPF</button>
+            <button id="simulateCpfBtn" type="button">Simular consulta CPF</button>
+          </div>
+          <p id="sherlockMessage" class="sherlock-message" role="status"></p>
+        </form>
+
+        <aside class="sherlock-status-card">
+          <p class="eyebrow">Disponibilidade</p>
+          <div class="status-list">
+            <div><span>CPF real</span><strong id="cpfRealStatus">--</strong></div>
+            <div><span>CPF laboratorio</span><strong id="cpfLabStatus">--</strong></div>
+            <div><span>CNPJ publico</span><strong id="cnpjProviderStatus">--</strong></div>
+            <div><span>Cache</span><strong id="cacheStatus">--</strong></div>
+          </div>
+        </aside>
+      </section>
+
+      <section id="sherlockResultSection" class="sherlock-result-section" hidden>
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Resultado</p>
+            <h2>Consulta concluida</h2>
+          </div>
+          <span id="resultSummary" class="sherlock-status-pill">--</span>
+        </div>
+        <div id="sherlockResult" class="sherlock-result"></div>
+      </section>
+
+      <section class="sherlock-history-section">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Historico local seguro</p>
+            <h2>Ultimas consultas</h2>
+          </div>
+          <button id="clearSherlockHistory" class="sherlock-ghost-button" type="button">Limpar</button>
+        </div>
+        <div id="sherlockHistory" class="sherlock-history"></div>
+      </section>
+    </main>
+    <script src="/static/js/sherlock.js"></script>
+  </body>
+</html>

@@ -24,6 +24,7 @@ PROTECTED_PREFIXES = (
     "/darkforest",
     "/scanner",
     "/mcp-brasil",
+    "/sherlock",
     "/api/auth/csrf",
     "/api/auth/logout",
     "/api/agent/",
@@ -34,6 +35,7 @@ PROTECTED_PREFIXES = (
     "/api/security/",
     "/api/mcp-brasil/",
     "/api/public-data/",
+    "/api/sherlock/",
     "/api/status",
     "/api/admin/",
 )
@@ -57,6 +59,6 @@ class AuthRequiredMiddleware(BaseHTTPMiddleware):
         if validate_token(token_from_request(request)):
             return await call_next(request)
         audit_event("auth_required_failed", request=request, details={"path": path}, severity="warning")
-        if path in {"/agent", "/security", "/darkforest", "/scanner", "/mcp-brasil"}:
+        if path in {"/agent", "/security", "/darkforest", "/scanner", "/mcp-brasil", "/sherlock"}:
             return RedirectResponse("/login", status_code=303)
         return JSONResponse({"detail": "Autenticacao local necessaria."}, status_code=401)

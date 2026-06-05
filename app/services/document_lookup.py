@@ -15,7 +15,9 @@ from app.security.documents import (
     mask_cpf,
     sanitize_document_payload,
     validate_cpf,
+    validate_cnpj,
 )
+from app.services.cnpj_lookup import CnpjLookupError, CnpjLookupService
 from app.security.rate_limit import allow_request
 
 
@@ -30,13 +32,19 @@ class DocumentLookupService:
         *,
         rate_limiter: RateLimitFunction = allow_request,
         auditor: AuditFunction = audit_event,
+        cnpj_service: CnpjLookupService | None = None,
     ) -> None:
         self.provider = provider or DocumentLookupProvider()
+        self.custom_provider = provider is not None
+        self.cnpj_service = cnpj_service or CnpjLookupService(auditor=auditor)
         self.rate_limiter = rate_limiter
         self.auditor = auditor
 
     def status(self) -> dict[str, Any]:
-        return self.provider.status()
+        status = self.provider.status()
+        status["cpf_lab"] = "ativo" if settings.sherlock_cpf_lab_enabled else "inativo"
+        status["cnpj_public"] = self.cnpj_service.status()
+        return status
 
     def handle(self, message: str, *, user_id: str = "local-user") -> dict[str, Any] | None:
         route = classify_document_request(message)
@@ -52,6 +60,10 @@ class DocumentLookupService:
                 f"CPF {mask_cpf(document)}: {'valido' if validate_cpf(document) else 'invalido'}."
                 for document in documents
             ]
+            self.auditor(
+                "cpf_validate_completed",
+                details={"documents": [mask_cpf(document) for document in documents], "valid": [validate_cpf(document) for document in documents]},
+            )
             return self._result(
                 route,
                 "\n".join(answers),
@@ -61,6 +73,28 @@ class DocumentLookupService:
                 tool="cpf_validate_local",
             )
 
+        if intent == "cpf_lab_lookup":
+            answers = []
+            for document in documents:
+                masked = mask_cpf(document)
+                if not settings.sherlock_cpf_lab_enabled:
+                    answers.append("O modo laboratorio de CPF esta desativado.")
+                    continue
+                answers.append(
+                    "Modo laboratorio: dados ficticios para estudo.\n\n"
+                    f"CPF: {masked}\nNome: Pessoa Ficticia de Demonstracao\n"
+                    "Situacao simulada: regular\nUF simulada: SP"
+                )
+                self.auditor("cpf_lab_simulated", details={"document": masked})
+            return self._result(
+                route,
+                "\n\n".join(answers),
+                f"Simulacao de CPF concluida para {', '.join(mask_cpf(document) for document in documents)}.",
+                started,
+                status="ok" if settings.sherlock_cpf_lab_enabled else "disabled",
+                tool="cpf_lab_simulation",
+            )
+
         if intent == "cpf_lookup" and is_clear_cpf_abuse(message, documents):
             masked = [mask_cpf(document) for document in documents[:5]]
             self.auditor(
@@ -68,7 +102,7 @@ class DocumentLookupService:
                 details={"documents": masked, "reason": "mass_or_automated_pattern", "count": len(documents)},
                 severity="warning",
             )
-            answer = "Bloqueei esta consulta porque ela parece ser uma consulta em massa ou automatizada. Envie no maximo 5 CPFs por pedido."
+            answer = "Bloqueei esta consulta porque ela parece ser uma lista ou consulta automatizada. Envie apenas um CPF por pedido."
             return self._result(route, answer, answer, started, status="blocked", tool="document_lookup")
 
         limit = settings.cpf_lookup_rate_limit_per_hour if document_type == "cpf" else settings.cnpj_lookup_rate_limit_per_hour
@@ -85,7 +119,12 @@ class DocumentLookupService:
             masked = mask_cpf(document) if document_type == "cpf" else mask_cnpj(document)
             event_prefix = "cpf_lookup" if document_type == "cpf" else "cnpj_lookup"
             try:
-                raw = self.provider.lookup(document_type, document)
+                if document_type == "cnpj" and not self.custom_provider:
+                    if not validate_cnpj(document):
+                        raise CnpjLookupError(f"CNPJ {masked}: invalido.")
+                    raw = self.cnpj_service.lookup(document)
+                else:
+                    raw = self.provider.lookup(document_type, document)
                 display, status = _format_lookup_response(document_type, masked, raw)
                 answers.append(display)
                 history.append(f"Consulta autorizada concluida para {document_type.upper()} {masked}. Status: {status}.")
@@ -94,13 +133,12 @@ class DocumentLookupService:
                     f"{event_prefix}_completed",
                     details={"document": masked, "status": status, "provider": self.provider.name},
                 )
-            except DocumentLookupError as exc:
+            except (DocumentLookupError, CnpjLookupError) as exc:
                 error = mask_secrets(str(exc))
                 if document_type == "cpf" and "nao configurado" in error.lower():
                     answers.append(
-                        f"Nao consegui consultar CPF {masked} agora. "
-                        "DadosAbertosBrasil nao fornece consulta livre de CPF; "
-                        "o provider documental autorizado nao esta configurado."
+                        "A consulta real de CPF ainda nao esta configurada no ambiente de producao. "
+                        "Posso validar o CPF localmente ou simular uma consulta em modo laboratorio."
                     )
                 else:
                     answers.append(f"Nao consegui consultar {document_type.upper()} {masked} agora. {error}")
@@ -170,6 +208,7 @@ def _format_lookup_response(document_type: str, masked_document: str, raw: dict[
         data.get("status")
         or data.get("situacao")
         or data.get("situacao_cadastral")
+        or data.get("descricao_situacao_cadastral")
         or data.get("registration_status")
         or "concluida"
     )
@@ -189,6 +228,8 @@ def _selected_fields(document_type: str, data: dict[str, Any]) -> list[tuple[str
         "nome_fantasia": "Nome fantasia",
         "trade_name": "Nome fantasia",
         "cnae_fiscal_descricao": "Atividade principal",
+        "situacao_cadastral": "Situacao cadastral",
+        "descricao_situacao_cadastral": "Situacao cadastral",
         "municipio": "Municipio",
         "city": "Municipio",
         "uf": "UF",
@@ -197,7 +238,19 @@ def _selected_fields(document_type: str, data: dict[str, Any]) -> list[tuple[str
     allowed = (
         ("nome", "name", "data_nascimento", "birth_date", "municipio", "city", "uf", "state")
         if document_type == "cpf"
-        else ("razao_social", "legal_name", "nome_fantasia", "trade_name", "cnae_fiscal_descricao", "municipio", "city", "uf", "state")
+        else (
+            "razao_social",
+            "legal_name",
+            "nome_fantasia",
+            "trade_name",
+            "situacao_cadastral",
+            "descricao_situacao_cadastral",
+            "cnae_fiscal_descricao",
+            "municipio",
+            "city",
+            "uf",
+            "state",
+        )
     )
     selected: list[tuple[str, str]] = []
     seen_labels: set[str] = set()
