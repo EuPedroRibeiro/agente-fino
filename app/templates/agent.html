@@ -8,6 +8,7 @@
     <link rel="shortcut icon" href="/static/favicon.ico" />
     <link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
     <link rel="stylesheet" href="/static/css/agent.css" />
+    <link rel="stylesheet" href="/static/css/themes/agent-retro-bg.css" />
     <script>
       const agenteFinoAuthenticated =
         localStorage.getItem("agente_fino_authenticated") === "true" ||
@@ -18,6 +19,17 @@
     </script>
   </head>
   <body class="agent-page empty-state-active">
+    <div class="retro-bg-layer" aria-hidden="true">
+      <span class="retro-grid"></span>
+      <span class="retro-cloud retro-cloud-one"></span>
+      <span class="retro-cloud retro-cloud-two"></span>
+      <span class="retro-blocks retro-blocks-one"></span>
+      <span class="retro-blocks retro-blocks-two"></span>
+      <span class="retro-coin retro-coin-one"></span>
+      <span class="retro-coin retro-coin-two"></span>
+      <span class="retro-pipe"></span>
+      <span class="retro-horizon"></span>
+    </div>
     <main class="app-shell">
       <aside class="conversation-sidebar" aria-label="Conversas">
         <div class="sidebar-brand">
