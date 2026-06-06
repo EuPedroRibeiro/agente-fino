@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Amostras Visuais - Agente Fino</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
+    <link rel="shortcut icon" href="/static/favicon.ico" />
+    <link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
+    <link rel="stylesheet" href="/static/css/agent.css" />
+    <link rel="stylesheet" href="/static/css/themes/mario-sample.css" />
+  </head>
+  <body class="samples-page">
+    <main class="samples-page-shell">
+      <nav class="samples-nav" aria-label="Navegacao das amostras">
+        <a class="samples-brand" href="/agent">
+          <img class="brand-symbol-small" src="/static/brand/agente-fino-symbol-reduced.png" alt="" aria-hidden="true" />
+          <span>Agente <strong>Fino</strong></span>
+        </a>
+        <a class="samples-back-link" href="/agent">Voltar ao chat</a>
+      </nav>
+
+      <header class="samples-hero">
+        <p class="eyebrow">Laboratorio visual</p>
+        <h1>Amostras Visuais</h1>
+        <p>Experimentos de interface isolados do produto principal. Cada preview vive apenas dentro do proprio card.</p>
+      </header>
+
+      <section class="samples-gallery" aria-label="Temas disponiveis">
+        <article class="sample-card">
+          <div class="sample-card-heading">
+            <div>
+              <p class="eyebrow">Preview isolado</p>
+              <h2>Tema Arcade Retro</h2>
+              <p>Uma vitrine pixelada inspirada em interfaces de plataforma classicas, sem alterar o Agente Fino.</p>
+            </div>
+            <span class="sample-scope-chip">Somente neste card</span>
+          </div>
+
+          <div class="mario-sample-theme" data-preview-state="idle">
+            <div class="mario-sample-hud" aria-label="Painel arcade decorativo">
+              <span>FINO</span>
+              <span>SCORE 004200</span>
+              <span>WORLD DEMO</span>
+              <span>TIME 260</span>
+            </div>
+
+            <div class="mario-sample-scene" aria-hidden="true">
+              <span class="mario-sample-cloud cloud-one"></span>
+              <span class="mario-sample-cloud cloud-two"></span>
+              <span class="mario-sample-block block-one">?</span>
+              <span class="mario-sample-block block-two"></span>
+              <span class="mario-sample-block block-three">?</span>
+              <span class="mario-sample-pipe"></span>
+              <span class="mario-sample-runner"></span>
+              <span class="mario-sample-ground"></span>
+            </div>
+
+            <div class="mario-sample-overlay">
+              <p class="mario-sample-kicker">ARCADE UI / 01</p>
+              <strong>Preview pronto</strong>
+              <span id="arcadePreviewStatus">A animacao fica pausada ate voce ativar.</span>
+              <button id="arcadePreviewToggle" class="mario-sample-button" type="button" aria-pressed="false">
+                Aplicar preview
+              </button>
+            </div>
+          </div>
+
+          <footer class="sample-card-footer">
+            <span>CSS modular</span>
+            <span>Sem audio</span>
+            <span>Sem assets externos</span>
+            <span>Responsivo</span>
+          </footer>
+        </article>
+      </section>
+    </main>
+    <script src="/static/js/mario-sample.js"></script>
+  </body>
+</html>
