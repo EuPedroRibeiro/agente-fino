@@ -9,6 +9,7 @@
     <link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
     <link rel="stylesheet" href="/static/css/agent.css" />
     <link rel="stylesheet" href="/static/css/sherlock.css" />
+    <link rel="stylesheet" href="/static/css/themes/platform-pixel-global.css" />
     <script>
       const agenteFinoAuthenticated =
         localStorage.getItem("agente_fino_authenticated") === "true" ||
@@ -17,6 +18,15 @@
     </script>
   </head>
   <body class="sherlock-page">
+    <div class="pixel-world-layer" aria-hidden="true">
+      <span class="pixel-cloud pixel-cloud-a"></span>
+      <span class="pixel-cloud pixel-cloud-b"></span>
+      <span class="pixel-coin pixel-coin-a"></span>
+      <span class="pixel-coin pixel-coin-b"></span>
+      <span class="pixel-blocks pixel-blocks-a"></span>
+      <span class="pixel-platform pixel-platform-a"></span>
+      <span class="pixel-ground"></span>
+    </div>
     <main class="sherlock-shell">
       <nav class="sherlock-nav" aria-label="Navegacao Sherlock">
         <a class="sherlock-brand" href="/agent">

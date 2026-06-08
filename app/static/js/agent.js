@@ -9,7 +9,6 @@ const ui = {
   deepResearchBtn: document.querySelector("#deepResearchBtn"),
   darkforestBtn: document.querySelector("#darkforestBtn"),
   sherlockBtn: document.querySelector("#sherlockBtn"),
-  samplesBtn: document.querySelector("#samplesBtn"),
   securityShortcutBtn: document.querySelector("#securityShortcutBtn"),
   mcpBrasilBtn: document.querySelector("#mcpBrasilBtn"),
   retestGeminiBtn: document.querySelector("#retestGeminiBtn"),
@@ -858,9 +857,6 @@ on(ui.darkforestBtn, "click", () => {
 });
 on(ui.sherlockBtn, "click", () => {
   window.location.href = "/sherlock";
-});
-on(ui.samplesBtn, "click", () => {
-  window.location.href = "/samples";
 });
 on(ui.securityShortcutBtn, "click", () => {
   window.location.href = "/security";

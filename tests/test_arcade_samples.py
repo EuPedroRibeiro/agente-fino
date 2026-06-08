@@ -63,13 +63,12 @@ class ArcadeSamplesTests(unittest.TestCase):
         self.assertNotIn("document.body.classList", self.js)
         self.assertNotIn("document.documentElement", self.js)
 
-    def test_agent_links_to_samples_from_hidden_drawer(self) -> None:
+    def test_samples_remain_legacy_protected_but_are_outside_primary_navigation(self) -> None:
         agent_html = Path("app/templates/agent.html").read_text(encoding="utf-8")
         agent_js = Path("app/static/js/agent.js").read_text(encoding="utf-8")
-        visible_main = agent_html.split('id="detailsDrawer"', 1)[0]
-        self.assertNotIn("Amostras Visuais", visible_main)
-        self.assertIn('id="samplesBtn"', agent_html)
-        self.assertIn('window.location.href = "/samples"', agent_js)
+        self.assertNotIn("Amostras Visuais", agent_html)
+        self.assertNotIn('id="samplesBtn"', agent_html)
+        self.assertNotIn('window.location.href = "/samples"', agent_js)
 
 
 if __name__ == "__main__":
