@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Copa dos Sonhos · Agente Fino</title>
+  <link rel="icon" href="/favicon.ico">
+  <link rel="stylesheet" href="/static/css/platform-pixel-global.css">
+  <link rel="stylesheet" href="/static/css/dream_cup.css">
+</head>
+<body class="platform-theme dream-cup-page">
+  <div class="pixel-sky" aria-hidden="true">
+    <span class="cloud cloud-a"></span>
+    <span class="cloud cloud-b"></span>
+    <span class="coin coin-a"></span>
+    <span class="coin coin-b"></span>
+    <span class="pipe pipe-a"></span>
+  </div>
+
+  <main class="cup-shell">
+    <header class="cup-hero">
+      <a class="back-link" href="/agent" aria-label="Voltar para o Agente Fino">← Agente Fino</a>
+      <div class="hero-copy">
+        <p class="eyebrow">Agente Fino apresenta</p>
+        <h1>Copa dos Sonhos</h1>
+        <p class="subtitle">Role seleções históricas, escolha craques reais, monte os 11 e simule uma Copa com animação, química e drama.</p>
+      </div>
+      <div class="score-mark" aria-hidden="true"><span>7</span><small>x</small><span>0</span></div>
+    </header>
+
+    <section class="control-deck" aria-label="Configurações da partida">
+      <div class="control-group">
+        <span class="control-label">Modo</span>
+        <button class="pill active" data-mode="classic" type="button">Clássico</button>
+        <button class="pill" data-mode="memory" type="button">De memória</button>
+      </div>
+      <div class="control-group formation-group">
+        <span class="control-label">Formação</span>
+        <button class="pill active" data-formation="4-3-3" type="button">4-3-3</button>
+        <button class="pill" data-formation="4-4-2" type="button">4-4-2</button>
+        <button class="pill" data-formation="4-2-3-1" type="button">4-2-3-1</button>
+        <button class="pill" data-formation="3-5-2" type="button">3-5-2</button>
+      </div>
+      <div class="control-group tactic-group">
+        <span class="control-label">Estilo</span>
+        <button class="pill active" data-tactic="balanced" type="button">Equilibrado</button>
+        <button class="pill" data-tactic="attack" type="button">Ataque total</button>
+        <button class="pill" data-tactic="control" type="button">Controle</button>
+      </div>
+    </section>
+
+    <section class="game-grid">
+      <article class="squad-board panel-card">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Seu time</p>
+            <h2>Onze titular</h2>
+          </div>
+          <div class="team-stats">
+            <span id="overallStat">OVR --</span>
+            <span id="chemStat">QUI --</span>
+          </div>
+        </div>
+        <div id="lineup" class="lineup pitch" aria-live="polite"></div>
+        <div class="lineup-footer">
+          <button id="resetBtn" class="secondary-btn" type="button">Recomeçar</button>
+          <button id="simulateBtn" class="primary-btn" type="button" disabled>Simular Copa</button>
+        </div>
+      </article>
+
+      <article class="draft-board panel-card">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Draft</p>
+            <h2 id="rollTitle">Role o dado</h2>
+          </div>
+          <div class="skip-counter"><span id="skipCount">3</span> coringas</div>
+        </div>
+
+        <div class="dice-stage">
+          <button id="rollBtn" class="dice-button" type="button" aria-label="Sortear seleção e Copa">
+            <span class="dice-face">⚂</span>
+            <strong>Rolar seleção</strong>
+          </button>
+          <button id="skipBtn" class="secondary-btn" type="button" disabled>Pular</button>
+        </div>
+
+        <div id="drawCard" class="draw-card empty">
+          <p>Uma seleção histórica vai aparecer aqui. Escolha um jogador compatível com as vagas abertas.</p>
+        </div>
+
+        <div id="playerList" class="player-list" aria-live="polite"></div>
+      </article>
+    </section>
+
+    <section id="simulationPanel" class="simulation-panel panel-card hidden" aria-live="polite">
+      <div class="panel-head">
+        <div>
+          <p class="eyebrow">Simulação cinematográfica</p>
+          <h2>Campanha da Copa</h2>
+        </div>
+        <button id="quickSimBtn" class="secondary-btn" type="button">Auto-sim</button>
+      </div>
+      <div id="matchTimeline" class="match-timeline"></div>
+      <div id="resultCard" class="result-card hidden"></div>
+    </section>
+  </main>
+
+  <script src="/static/js/dream_cup.js" defer></script>
+</body>
+</html>
