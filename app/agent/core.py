@@ -196,9 +196,29 @@ class NexusCore:
             apply_decision(state, decision)
             state.intent = decision.intent
             state.category = decision.category
-            state.mode = "SAFE_ERROR"
-            state.final_answer = decision.fallback_answer
-            state.confidence = max(0.2, min(decision.confidence, 0.6))
+            if decision.answer_directly:
+                state.mode = decision.mode
+                state.final_answer = decision.direct_answer or decision.fallback_answer
+                state.selected_tools = []
+                state.web_used = False
+                state.web_status = {"used": False, "skipped": "local_intelligence_fallback"}
+                state.rag_status = {"used": False, "skipped": "local_intelligence_fallback"}
+                state.model_used = {
+                    "provider": "local-intelligence",
+                    "model": "fino-fast-local-fallback",
+                    "used_model": False,
+                    "llm_used": False,
+                    "used_web": False,
+                    "used_rag": False,
+                    "used_verifier": False,
+                    "fallback": True,
+                    "fallback_reason": "Falha auxiliar ignorada; resposta local preservada.",
+                }
+                state.confidence = decision.confidence
+            else:
+                state.mode = "SAFE_ERROR"
+                state.final_answer = decision.fallback_answer
+                state.confidence = max(0.2, min(decision.confidence, 0.6))
         latency_ms = int((time.perf_counter() - started) * 1000)
         record_run(state, latency_ms=latency_ms, success=success, error=error)
         return self._to_response(state)
@@ -219,8 +239,8 @@ class NexusCore:
             web_status={"used": False, "skipped": "fino_intelligence_direct"},
             rag_status={"used": False, "skipped": "fino_intelligence_direct"},
             model_used={
-                "provider": "fino-local",
-                "model": "intelligence-direct",
+                "provider": "local-intelligence",
+                "model": "fino-fast-local",
                 "used_model": False,
                 "llm_used": False,
                 "used_web": False,
@@ -234,19 +254,25 @@ class NexusCore:
             timings_ms={"total": latency_ms, "router": latency_ms},
         )
         apply_decision(state, decision)
-        conversation_logs.add_message(conversation_id=state.conversation_id, role="user", content=state.user_message)
-        conversation_logs.add_message(
-            conversation_id=state.conversation_id,
-            role="assistant",
-            content=state.final_answer,
-            provider=state.model_used["provider"],
-            model=state.model_used["model"],
-            intent=state.intent,
-            tools_used=[],
-            web_sources_count=0,
-            latency_ms=latency_ms,
-        )
-        record_run(state, latency_ms=latency_ms, success=True, error=None)
+        try:
+            conversation_logs.add_message(conversation_id=state.conversation_id, role="user", content=state.user_message)
+            conversation_logs.add_message(
+                conversation_id=state.conversation_id,
+                role="assistant",
+                content=state.final_answer,
+                provider=state.model_used["provider"],
+                model=state.model_used["model"],
+                intent=state.intent,
+                tools_used=[],
+                web_sources_count=0,
+                latency_ms=latency_ms,
+            )
+        except Exception:
+            state.warnings.append("Historico indisponivel; resposta local preservada.")
+        try:
+            record_run(state, latency_ms=latency_ms, success=True, error=None)
+        except Exception:
+            state.warnings.append("Observabilidade indisponivel; resposta local preservada.")
         return self._to_response(state)
 
     def _chat_with_document_lookup(self, request: AgentChatRequest, result: dict, started: float) -> AgentResponse:

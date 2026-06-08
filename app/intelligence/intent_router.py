@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 
 from app.agent.public_data_router import PublicDataRouter
 from app.agent.router import classify_message, normalize_for_intent, web_needed
+from app.intelligence.local_responses import detect_fast_local_intent
 from app.security.documents import classify_document_request
 from modules.mcp_brasil import MCPBrasilRouter
 
@@ -52,6 +53,17 @@ class FinoIntentRouter:
         normalized = normalize_for_intent(message)
         if not normalized:
             return self._result("unknown", "clarification_needed", "general", 0.4, "Mensagem vazia.")
+
+        fast_local_intent = detect_fast_local_intent(message)
+        if fast_local_intent:
+            return self._result(
+                fast_local_intent,
+                fast_local_intent,
+                "local_intelligence",
+                0.99,
+                "Intent basica reconhecida; resposta local imediata.",
+                {"intent": fast_local_intent, "category": "local_intelligence", "web_needed": False},
+            )
 
         # Public parliamentary expenses keep precedence over generic document lookup.
         if PublicDataRouter.is_parliamentary_expense_query(message):
@@ -130,6 +142,28 @@ class FinoIntentRouter:
                 "planning",
                 0.9,
                 "Pedido explicito de estrategia.",
+                {"intent": "routine_planning", "category": "planning", "web_needed": False},
+            )
+
+        if any(
+            term in normalized
+            for term in (
+                "me ajuda a melhorar",
+                "me ajuda a pensar",
+                "me ajuda a planejar",
+                "me ajuda a organizar",
+                "me ajude a melhorar",
+                "me ajude a pensar",
+                "me ajude a planejar",
+                "me ajude a organizar",
+            )
+        ):
+            return self._result(
+                "planning",
+                "routine_planning",
+                "planning",
+                0.9,
+                "Pedido explicito de planejamento ou melhoria.",
                 {"intent": "routine_planning", "category": "planning", "web_needed": False},
             )
 

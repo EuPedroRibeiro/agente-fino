@@ -5,8 +5,9 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from app.intelligence.confidence import adjusted_confidence
-from app.intelligence.fallback import casual_reply, fallback_answer, greeting_reply
+from app.intelligence.fallback import fallback_answer
 from app.intelligence.intent_router import FinoIntentRouter
+from app.intelligence.local_responses import detect_fast_local_intent, safe_answer_local_intent
 from app.intelligence.memory_context import memory_requirement
 from app.intelligence.observability import record_decision
 from app.intelligence.planner import build_safe_plan
@@ -45,6 +46,32 @@ class FinoIntelligenceEngine:
         try:
             return self._decide(message, conversation_context)
         except Exception:
+            local_intent = detect_fast_local_intent(message)
+            local_answer = safe_answer_local_intent(local_intent, message) if local_intent else None
+            if local_answer:
+                decision = IntelligenceDecision(
+                    intent=local_intent,
+                    execution_intent=local_intent,
+                    category="local_intelligence",
+                    mode="FAST",
+                    confidence=0.95,
+                    risk_level="low",
+                    router="fino-local-fallback",
+                    reason="Fallback local resolveu uma intent basica sem provider externo.",
+                    selected_tools=[],
+                    blocked_tools=[],
+                    web_needed=False,
+                    rag_needed=False,
+                    memory_needed=False,
+                    requires_confirmation=False,
+                    answer_directly=True,
+                    direct_answer=local_answer,
+                    fallback_answer=local_answer,
+                    plan=None,
+                    route={"intent": local_intent, "category": "local_intelligence", "web_needed": False},
+                )
+                record_decision(decision)
+                return decision
             decision = IntelligenceDecision(
                 intent="unknown",
                 execution_intent="unknown",
@@ -119,13 +146,7 @@ class FinoIntelligenceEngine:
 
     @staticmethod
     def _direct_answer(intent: str, message: str) -> str | None:
-        if intent == "greeting":
-            return greeting_reply(message)
-        if intent == "casual_chat":
-            return casual_reply(message)
-        if intent == "identity_query":
-            return "Sou o Agente Fino, sua IA para pensar, organizar e resolver."
-        return None
+        return safe_answer_local_intent(intent, message)
 
     @staticmethod
     def _mode_for(intent: str, selected_tools: list[str], web_needed: bool) -> str:

@@ -235,6 +235,9 @@ def _is_date_query(text: str) -> bool:
 def _is_identity_query(text: str) -> bool:
     patterns = [
         r"\bquem (e|eh) voce\b",
+        r"\bquem voce (e|eh)\b",
+        r"\bqual (e|eh )?(o )?seu nome\b",
+        r"\bcomo voce se chama\b",
         r"\bo que voce (faz|pode fazer|consegue fazer)\b",
         r"\bme explique o que voce consegue fazer\b",
         r"\bqual (e|eh) sua funcao\b",

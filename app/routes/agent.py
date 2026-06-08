@@ -384,20 +384,26 @@ def agent_run_events(run_id: str) -> StreamingResponse:
 def _friendly_chat_error_response(payload: AgentChatRequest) -> AgentResponse:
     conversation_id = payload.conversation_id or f"conv-{uuid4().hex[:10]}"
     decision = core.intelligence.decide(payload.message)
-    answer = decision.fallback_answer
+    answer = decision.direct_answer or decision.fallback_answer
+    local_direct = bool(decision.answer_directly and decision.mode == "FAST")
     return AgentResponse(
         conversation_id=conversation_id,
         answer=answer,
         final_answer=answer,
-        intent="chat_error",
-        category="system",
-        mode="SAFE_ERROR",
+        intent=decision.intent if local_direct else "chat_error",
+        category=decision.category if local_direct else "system",
+        mode=decision.mode if local_direct else "SAFE_ERROR",
         web_used=False,
         selected_tools=[],
-        model_used={"provider": "safe-error-handler", "model": "route-guard", "used_model": False, "llm_used": False},
+        model_used={
+            "provider": "local-intelligence" if local_direct else "safe-error-handler",
+            "model": "fino-fast-local" if local_direct else "route-guard",
+            "used_model": False,
+            "llm_used": False,
+        },
         risk_level="low",
-        confidence=1.0,
-        warnings=["A execucao falhou sem expor dados sensiveis."],
+        confidence=decision.confidence if local_direct else 1.0,
+        warnings=[] if local_direct else ["A execucao falhou sem expor dados sensiveis."],
         timings_ms={"total": 0},
         intelligence={
             "router": decision.router,
