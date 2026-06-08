@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="pt-BR">
   <head>
     <meta charset="utf-8" />
@@ -47,7 +47,10 @@
           <span aria-hidden="true">!</span>
           Segurança
         </button>
-
+        <a id="dreamCupShortcut" class="sidebar-action-button dream-cup-shortcut" href="/agent/copa-dos-sonhos">
+          <span aria-hidden="true">âš½</span>
+          Copa dos Sonhos
+        </a>
         <div class="sidebar-section">
           <label class="search-label" for="conversationSearch">Conversas</label>
           <input id="conversationSearch" class="search-input" type="search" placeholder="Buscar conversas..." />
@@ -86,6 +89,7 @@
               <button type="button" data-prompt="Resolver um problema">Resolver um problema</button>
               <button type="button" data-prompt="Pesquisar algo">Pesquisar algo</button>
               <button type="button" data-prompt="Organizar uma ideia">Organizar uma ideia</button>
+              <a class="dream-cup-chip" href="/agent/copa-dos-sonhos">Jogar Copa dos Sonhos</a>
             </div>
           </div>
           <div id="chatHistory" class="chat-history" aria-live="polite"></div>
@@ -305,3 +309,4 @@
     <script src="/static/js/agent.js"></script>
   </body>
 </html>
+

@@ -23,10 +23,29 @@
       <div class="hero-copy">
         <p class="eyebrow">Agente Fino apresenta</p>
         <h1>Copa dos Sonhos</h1>
-        <p class="subtitle">Role seleções históricas, escolha craques reais, monte os 11 e simule uma Copa com animação, química e drama.</p>
+        <p class="subtitle">Role o dado: sai uma seleção e uma Copa. Escale um craque que esteve lá, complete os 11 e simule — seu time faz 7 a 0?</p>
       </div>
       <div class="score-mark" aria-hidden="true"><span>7</span><small>x</small><span>0</span></div>
     </header>
+
+    <section class="database-strip panel-card" aria-label="Status do banco de dados">
+      <div>
+        <span id="dbTeams">--</span>
+        <small>seleções</small>
+      </div>
+      <div>
+        <span id="dbSquads">--</span>
+        <small>elencos</small>
+      </div>
+      <div>
+        <span id="dbPlayers">--</span>
+        <small>jogadores</small>
+      </div>
+      <div class="db-source">
+        <strong id="dbSource">Carregando banco...</strong>
+        <small>Ratings são calculados pelo jogo.</small>
+      </div>
+    </section>
 
     <section class="control-deck" aria-label="Configurações da partida">
       <div class="control-group">
@@ -71,7 +90,7 @@
       <article class="draft-board panel-card">
         <div class="panel-head">
           <div>
-            <p class="eyebrow">Draft</p>
+            <p class="eyebrow">Draft real de Copas</p>
             <h2 id="rollTitle">Role o dado</h2>
           </div>
           <div class="skip-counter"><span id="skipCount">3</span> coringas</div>
@@ -89,6 +108,11 @@
           <p>Uma seleção histórica vai aparecer aqui. Escolha um jogador compatível com as vagas abertas.</p>
         </div>
 
+        <label class="player-search">
+          <span>Filtrar elenco</span>
+          <input id="playerSearch" type="search" placeholder="Digite nome, camisa ou posição..." autocomplete="off">
+        </label>
+
         <div id="playerList" class="player-list" aria-live="polite"></div>
       </article>
     </section>
@@ -104,6 +128,10 @@
       <div id="matchTimeline" class="match-timeline"></div>
       <div id="resultCard" class="result-card hidden"></div>
     </section>
+
+    <footer class="data-credit">
+      Dados de elenco: Fjelstul World Cup Database / DataHub. Ratings e traits são derivados pelo jogo para balanceamento.
+    </footer>
   </main>
 
   <script src="/static/js/dream_cup.js" defer></script>

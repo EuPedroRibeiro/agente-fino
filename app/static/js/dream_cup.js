@@ -8,37 +8,23 @@
     "3-5-2": [["ST", "ST"], ["LM", "CM", "AM", "CM", "RM"], ["CB", "CB", "CB"], ["GK"]],
   };
 
-  const squads = [
-    { nation: "Brasil", flag: "🇧🇷", year: 1970, aura: "arte e domínio", players: [
-      p("Pelé", "FW", 99, "Finalizador genial"), p("Jairzinho", "FW", 95, "Ponta imparável"), p("Tostão", "FW", 93, "Falso 9 cerebral"), p("Rivelino", "MF", 94, "Canhota de elite"), p("Gérson", "MF", 93, "Maestro"), p("Carlos Alberto", "DF", 94, "Lateral capitão"), p("Clodoaldo", "MF", 90, "Equilíbrio"), p("Britto", "DF", 88, "Zagueiro forte"), p("Piazza", "DF", 89, "Saída limpa"), p("Félix", "GK", 86, "Goleiro seguro") ]},
-    { nation: "Brasil", flag: "🇧🇷", year: 2002, aura: "tridente pesado", players: [
-      p("Ronaldo", "FW", 97, "Fenômeno"), p("Ronaldinho", "FW", 95, "Magia"), p("Rivaldo", "FW", 96, "Decisivo"), p("Roberto Carlos", "DF", 94, "Lateral foguete"), p("Cafu", "DF", 93, "Motor eterno"), p("Lúcio", "DF", 91, "Zagueiro líder"), p("Edmílson", "DF", 88, "Versátil"), p("Gilberto Silva", "MF", 89, "Proteção"), p("Kléberson", "MF", 87, "Surpresa"), p("Marcos", "GK", 90, "Muralha") ]},
-    { nation: "Argentina", flag: "🇦🇷", year: 1986, aura: "camisa 10 absoluto", players: [
-      p("Maradona", "MF", 99, "Gênio total"), p("Valdano", "FW", 92, "Atacante técnico"), p("Burruchaga", "MF", 90, "Chegada decisiva"), p("Ruggeri", "DF", 90, "Zagueiro campeão"), p("Pumpido", "GK", 87, "Goleiro campeão"), p("Giusti", "MF", 86, "Combate"), p("Olarticoechea", "DF", 86, "Lateral"), p("Brown", "DF", 88, "Raça"), p("Enrique", "MF", 85, "Motor"), p("Batista", "MF", 86, "Volante") ]},
-    { nation: "Argentina", flag: "🇦🇷", year: 2022, aura: "energia e liderança", players: [
-      p("Messi", "FW", 98, "Maestro decisivo"), p("Di María", "FW", 92, "Final de cinema"), p("J. Álvarez", "FW", 90, "Pressão e gol"), p("Mac Allister", "MF", 88, "Conector"), p("De Paul", "MF", 88, "Motor"), p("Enzo", "MF", 89, "Passe vertical"), p("Otamendi", "DF", 88, "Experiência"), p("Romero", "DF", 89, "Combate"), p("Molina", "DF", 86, "Apoio"), p("E. Martínez", "GK", 91, "Pênaltis") ]},
-    { nation: "França", flag: "🇫🇷", year: 1998, aura: "casa, físico e técnica", players: [
-      p("Zidane", "MF", 97, "Elegância"), p("Henry", "FW", 90, "Velocidade"), p("Trezeguet", "FW", 89, "Área"), p("Deschamps", "MF", 90, "Capitão"), p("Vieira", "MF", 91, "Força"), p("Thuram", "DF", 94, "Muralha"), p("Blanc", "DF", 91, "Classe"), p("Desailly", "DF", 92, "Potência"), p("Lizarazu", "DF", 89, "Lateral"), p("Barthez", "GK", 90, "Reflexos") ]},
-    { nation: "França", flag: "🇫🇷", year: 2018, aura: "transição mortal", players: [
-      p("Mbappé", "FW", 95, "Velocidade absurda"), p("Griezmann", "FW", 92, "Decisão"), p("Giroud", "FW", 88, "Pivô"), p("Pogba", "MF", 91, "Passe e força"), p("Kanté", "MF", 94, "Onipresente"), p("Matuidi", "MF", 87, "Trabalho"), p("Varane", "DF", 91, "Zagueiro elite"), p("Umtiti", "DF", 89, "Impulsão"), p("Pavard", "DF", 86, "Lateral"), p("Lloris", "GK", 90, "Capitão") ]},
-    { nation: "Alemanha", flag: "🇩🇪", year: 2014, aura: "máquina coletiva", players: [
-      p("Neuer", "GK", 96, "Goleiro-líbero"), p("Lahm", "DF", 94, "Precisão"), p("Hummels", "DF", 91, "Zagueiro técnico"), p("Boateng", "DF", 90, "Físico"), p("Kroos", "MF", 93, "Passe perfeito"), p("Schweinsteiger", "MF", 92, "Comando"), p("Özil", "MF", 90, "Visão"), p("Müller", "FW", 92, "Espaço"), p("Klose", "FW", 90, "Recordista"), p("Götze", "FW", 88, "Final") ]},
-    { nation: "Itália", flag: "🇮🇹", year: 2006, aura: "defesa e frieza", players: [
-      p("Buffon", "GK", 97, "Muralha"), p("Cannavaro", "DF", 97, "Bola de Ouro"), p("Nesta", "DF", 91, "Classe"), p("Zambrotta", "DF", 91, "Lateral total"), p("Pirlo", "MF", 95, "Regista"), p("Gattuso", "MF", 90, "Cão de guarda"), p("Totti", "MF", 92, "Criador"), p("Del Piero", "FW", 90, "Técnica"), p("Toni", "FW", 89, "Área"), p("Grosso", "DF", 88, "Momento") ]},
-    { nation: "Espanha", flag: "🇪🇸", year: 2010, aura: "posse hipnótica", players: [
-      p("Casillas", "GK", 94, "Santo"), p("Puyol", "DF", 93, "Raça"), p("Piqué", "DF", 91, "Saída"), p("Sergio Ramos", "DF", 92, "Potência"), p("Xavi", "MF", 97, "Controle"), p("Iniesta", "MF", 96, "Magia"), p("Busquets", "MF", 92, "Leitura"), p("Xabi Alonso", "MF", 91, "Passe longo"), p("David Villa", "FW", 94, "Gol"), p("Torres", "FW", 88, "Explosão") ]},
-    { nation: "Portugal", flag: "🇵🇹", year: 2006, aura: "ponta e maestro", players: [
-      p("Cristiano Ronaldo", "FW", 94, "Explosão"), p("Figo", "MF", 92, "Classe"), p("Deco", "MF", 91, "Criação"), p("Pauleta", "FW", 88, "Área"), p("Maniche", "MF", 88, "Chute"), p("Costinha", "MF", 86, "Volante"), p("Ricardo Carvalho", "DF", 91, "Elegância"), p("Nuno Valente", "DF", 86, "Lateral"), p("Miguel", "DF", 86, "Apoio"), p("Ricardo", "GK", 88, "Pênaltis") ]},
-    { nation: "Holanda", flag: "🇳🇱", year: 1974, aura: "futebol total", players: [
-      p("Cruyff", "FW", 98, "Futebol total"), p("Neeskens", "MF", 94, "Motor"), p("Rep", "FW", 88, "Ataque"), p("Rensenbrink", "FW", 90, "Técnica"), p("Krol", "DF", 92, "Líbero"), p("Haan", "MF", 89, "Versátil"), p("Jansen", "MF", 87, "Controle"), p("Suurbier", "DF", 87, "Lateral"), p("Rijsbergen", "DF", 86, "Zagueiro"), p("Jongbloed", "GK", 85, "Goleiro") ]},
-    { nation: "Inglaterra", flag: "🏴", year: 1966, aura: "casa e tradição", players: [
-      p("Bobby Charlton", "MF", 96, "Lenda"), p("Bobby Moore", "DF", 96, "Capitão"), p("Gordon Banks", "GK", 94, "Reflexos"), p("Geoff Hurst", "FW", 91, "Final"), p("Martin Peters", "MF", 89, "Chegada"), p("Nobby Stiles", "MF", 87, "Marcação"), p("Jack Charlton", "DF", 88, "Zagueiro"), p("Alan Ball", "MF", 88, "Motor"), p("Roger Hunt", "FW", 88, "Área"), p("Ray Wilson", "DF", 86, "Lateral") ]},
-  ];
+  const roleBySlot = (slot) => {
+    if (slot === "GK") return "GK";
+    if (["CB", "LB", "RB"].includes(slot)) return "DF";
+    if (["CM", "DM", "AM", "LM", "RM"].includes(slot)) return "MF";
+    return "FW";
+  };
 
-  const opponents = ["Uruguai 1950", "Brasil 1970", "Itália 1982", "Argentina 1986", "Alemanha 1990", "França 1998", "Brasil 2002", "Itália 2006", "Espanha 2010", "Alemanha 2014", "França 2018", "Argentina 2022", "Croácia 2018", "Holanda 2010", "Portugal 2006", "Bélgica 2018"];
-  const stages = ["Grupo 1", "Grupo 2", "Grupo 3", "Oitavas", "Quartas", "Semifinal", "Final"];
+  const roleLabel = (role) => ({
+    GK: "Goleiro",
+    DF: "Defesa",
+    MF: "Meio",
+    FW: "Ataque",
+  }[role] || "Jogador");
 
   const state = {
+    database: null,
+    squads: [],
     formation: "4-3-3",
     mode: "classic",
     tactic: "balanced",
@@ -47,6 +33,7 @@
     usedSquads: new Set(),
     skips: 3,
     finished: false,
+    filter: "",
   };
 
   const el = (id) => document.getElementById(id);
@@ -65,24 +52,62 @@
   const matchTimeline = el("matchTimeline");
   const resultCard = el("resultCard");
   const quickSimBtn = el("quickSimBtn");
+  const playerSearch = el("playerSearch");
+  const dbTeams = el("dbTeams");
+  const dbSquads = el("dbSquads");
+  const dbPlayers = el("dbPlayers");
+  const dbSource = el("dbSource");
 
-  function p(name, role, rating, trait) { return { name, role, rating, trait }; }
-  function normalizeRole(slot) {
-    if (slot === "GK") return "GK";
-    if (["CB", "LB", "RB"].includes(slot)) return "DF";
-    if (["CM", "DM", "AM", "LM", "RM"].includes(slot)) return "MF";
-    return "FW";
+  function formatNumber(value) {
+    return Number(value || 0).toLocaleString("pt-BR");
   }
-  function initials(name) { return name.split(/\s+/).map(x => x[0]).join("").slice(0, 2).toUpperCase(); }
-  function availableSlotsFor(player) {
-    return state.lineup.filter(slot => !slot.player && normalizeRole(slot.pos) === player.role);
+
+  async function fetchJson(url) {
+    const response = await fetch(url, { cache: "no-store" });
+    if (!response.ok) throw new Error(`HTTP ${response.status} em ${url}`);
+    return response.json();
   }
+
+  async function loadDatabase() {
+    try {
+      state.database = await fetchJson("/static/data/dream_cup_database.json");
+    } catch (_err) {
+      state.database = await fetchJson("/static/data/dream_cup_seed.json");
+    }
+    state.squads = Array.isArray(state.database.squads) ? state.database.squads.filter(s => Array.isArray(s.players) && s.players.length) : [];
+    if (!state.squads.length) throw new Error("Banco da Copa dos Sonhos vazio.");
+    renderDatabaseStats();
+  }
+
+  function renderDatabaseStats() {
+    const stats = state.database.stats || {};
+    dbTeams.textContent = formatNumber(stats.teams || new Set(state.squads.map(s => s.nation)).size);
+    dbSquads.textContent = formatNumber(stats.squads || state.squads.length);
+    dbPlayers.textContent = formatNumber(stats.unique_players || new Set(state.squads.flatMap(s => s.players.map(p => p.id || p.name))).size);
+    dbSource.textContent = state.database.source || "Banco local da Copa dos Sonhos";
+  }
+
   function flattenFormation() {
-    return formations[state.formation].map((row, rowIndex) => row.map((pos, slotIndex) => ({ pos, row: rowIndex, slotIndex, player: null }))).flat();
+    return formations[state.formation]
+      .map((row, rowIndex) => row.map((pos, slotIndex) => ({ pos, row: rowIndex, slotIndex, player: null })))
+      .flat();
   }
+
   function groupedLineup() {
     const rows = formations[state.formation].length;
     return Array.from({ length: rows }, (_, i) => state.lineup.filter(slot => slot.row === i));
+  }
+
+  function playerKey(player) {
+    return `${player.id || player.name}-${player.nation}-${player.year}`;
+  }
+
+  function availableSlotsFor(player) {
+    return state.lineup.filter(slot => !slot.player && roleBySlot(slot.pos) === player.role);
+  }
+
+  function chosenPlayerKeys() {
+    return new Set(state.lineup.filter(s => s.player).map(s => playerKey(s.player)));
   }
 
   function renderLineup() {
@@ -98,10 +123,10 @@
         pos.textContent = slot.pos;
         const name = document.createElement("div");
         name.className = "slot-name";
-        name.textContent = slot.player ? slot.player.name : "Vaga aberta";
+        name.textContent = slot.player ? displayName(slot.player) : "Vaga aberta";
         const meta = document.createElement("div");
         meta.className = "slot-meta";
-        meta.textContent = slot.player ? `${slot.player.nation} ${slot.player.year} · ${slot.player.trait}` : roleLabel(normalizeRole(slot.pos));
+        meta.textContent = slot.player ? playerMeta(slot.player) : roleLabel(roleBySlot(slot.pos));
         node.append(pos, name, meta);
         if (slot.player) {
           const rating = document.createElement("span");
@@ -116,210 +141,147 @@
     updateStats();
   }
 
-  function roleLabel(role) {
-    return { GK: "Goleiro", DF: "Defesa", MF: "Meio", FW: "Ataque" }[role] || role;
+  function displayName(player) {
+    if (state.mode !== "memory") return player.name;
+    return `${player.role} ${player.shirt_number ? "#" + player.shirt_number : "?"}`;
+  }
+
+  function playerMeta(player) {
+    const shirt = player.shirt_number ? `#${player.shirt_number} · ` : "";
+    return `${shirt}${player.nation} ${player.year} · ${player.trait || roleLabel(player.role)}`;
+  }
+
+  function calculateChemistry() {
+    const picked = state.lineup.filter(slot => slot.player).map(slot => slot.player);
+    if (!picked.length) return 0;
+    const nations = new Map();
+    const decades = new Map();
+    let roleFit = 0;
+    picked.forEach(p => {
+      nations.set(p.nation, (nations.get(p.nation) || 0) + 1);
+      const decade = Math.floor(Number(p.year || 0) / 10) * 10;
+      decades.set(decade, (decades.get(decade) || 0) + 1);
+      roleFit += 1;
+    });
+    const sameNation = Math.max(...nations.values());
+    const sameDecade = Math.max(...decades.values());
+    const mixPenalty = Math.max(0, nations.size - 4) * 3;
+    return Math.max(20, Math.min(100, Math.round(35 + sameNation * 5 + sameDecade * 3 + roleFit * 2 - mixPenalty)));
+  }
+
+  function calculateOverall() {
+    const picked = state.lineup.filter(slot => slot.player).map(slot => slot.player);
+    if (!picked.length) return 0;
+    const avg = picked.reduce((sum, p) => sum + Number(p.rating || 70), 0) / picked.length;
+    return Math.round(avg);
   }
 
   function updateStats() {
-    const players = state.lineup.map(s => s.player).filter(Boolean);
-    if (!players.length) {
-      overallStat.textContent = "OVR --";
-      chemStat.textContent = "QUI --";
-      simulateBtn.disabled = true;
+    const overall = calculateOverall();
+    const chem = calculateChemistry();
+    overallStat.textContent = `OVR ${overall || "--"}`;
+    chemStat.textContent = `QUI ${chem || "--"}`;
+    simulateBtn.disabled = state.lineup.some(slot => !slot.player);
+  }
+
+  function drawSquad() {
+    if (!state.squads.length) return null;
+    const compatible = state.squads.filter(squad => {
+      if (state.usedSquads.has(squad.id)) return false;
+      return squad.players.some(player => availableSlotsFor(player).length > 0 && !chosenPlayerKeys().has(playerKey(player)));
+    });
+    const pool = compatible.length ? compatible : state.squads;
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  function renderDrawCard() {
+    if (!state.currentSquad) {
+      drawCard.className = "draw-card empty";
+      drawCard.innerHTML = "<p>Uma seleção histórica vai aparecer aqui. Escolha um jogador compatível com as vagas abertas.</p>";
       return;
     }
-    const overall = Math.round(players.reduce((sum, p) => sum + p.rating, 0) / players.length);
-    const chemistry = calculateChemistry(players);
-    overallStat.textContent = `OVR ${overall}`;
-    chemStat.textContent = `QUI ${chemistry}`;
-    simulateBtn.disabled = players.length !== state.lineup.length;
-  }
-
-  function calculateChemistry(players) {
-    const nations = new Map();
-    const eras = new Map();
-    players.forEach(player => {
-      nations.set(player.nation, (nations.get(player.nation) || 0) + 1);
-      eras.set(Math.floor(player.year / 10) * 10, (eras.get(Math.floor(player.year / 10) * 10) || 0) + 1);
-    });
-    const nationBonus = Math.max(...nations.values(), 0) * 3;
-    const eraBonus = Math.max(...eras.values(), 0) * 2;
-    const balance = ["GK", "DF", "MF", "FW"].every(role => players.some(p => p.role === role)) ? 12 : 0;
-    return Math.min(100, 48 + nationBonus + eraBonus + balance + players.length * 2);
-  }
-
-  function rollSquad() {
-    if (state.finished) return;
-    rollBtn.classList.add("rolling");
-    setTimeout(() => rollBtn.classList.remove("rolling"), 650);
-    const remaining = squads.filter((_, index) => !state.usedSquads.has(index));
-    const pool = remaining.length ? remaining : squads;
-    const squad = pool[Math.floor(Math.random() * pool.length)];
-    const index = squads.indexOf(squad);
-    state.usedSquads.add(index);
-    state.currentSquad = squad;
-    renderDraw(squad);
-  }
-
-  function renderDraw(squad) {
-    rollTitle.textContent = `${squad.flag} ${squad.nation} ${squad.year}`;
+    const squad = state.currentSquad;
     drawCard.className = "draw-card";
-    drawCard.innerHTML = "";
-    const title = document.createElement("h3");
-    title.textContent = `${squad.flag} ${squad.nation} · Copa ${squad.year}`;
-    const desc = document.createElement("p");
-    desc.textContent = `Aura: ${squad.aura}. Escolha um jogador compatível com as vagas abertas.`;
-    drawCard.append(title, desc);
-    skipBtn.disabled = state.skips <= 0;
-    renderPlayers(squad.players.map(player => ({ ...player, nation: squad.nation, year: squad.year, flag: squad.flag })));
+    drawCard.innerHTML = `
+      <p class="eyebrow">${squad.tournament || "Copa do Mundo"}</p>
+      <h3>${escapeHtml(squad.nation)} ${squad.year}</h3>
+      <p>${escapeHtml(squad.aura || "elenco real")} · força ${squad.strength || "--"} · ${squad.players.length} jogadores no elenco</p>
+    `;
   }
 
-  function renderPlayers(players) {
+  function renderPlayers() {
     playerList.innerHTML = "";
-    players.sort((a, b) => b.rating - a.rating).forEach(player => {
-      const compatible = availableSlotsFor(player).length > 0;
-      const btn = document.createElement("button");
-      btn.className = "player-card";
-      btn.type = "button";
-      btn.disabled = !compatible;
-      const avatar = document.createElement("span");
-      avatar.className = "avatar";
-      avatar.textContent = initials(player.name);
-      const copy = document.createElement("span");
-      const name = document.createElement("span");
-      name.className = "player-name";
-      name.textContent = player.name;
-      const detail = document.createElement("span");
-      detail.className = "player-detail";
-      detail.textContent = `${roleLabel(player.role)} · ${player.trait}${compatible ? "" : " · sem vaga compatível"}`;
-      copy.append(name, detail);
-      const rating = document.createElement("span");
-      rating.className = "player-rating";
-      rating.textContent = state.mode === "memory" ? "?" : player.rating;
-      btn.append(avatar, copy, rating);
-      btn.addEventListener("click", () => pickPlayer(player));
-      playerList.appendChild(btn);
+    if (!state.currentSquad) {
+      playerList.innerHTML = `<div class="draw-card empty"><p>Role uma seleção para liberar o elenco.</p></div>`;
+      return;
+    }
+
+    const picked = chosenPlayerKeys();
+    const term = state.filter.trim().toLowerCase();
+    const players = state.currentSquad.players
+      .filter(player => {
+        if (!term) return true;
+        const text = `${player.name} ${player.role} ${player.position_name || ""} ${player.shirt_number || ""}`.toLowerCase();
+        return text.includes(term);
+      })
+      .slice()
+      .sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
+
+    if (!players.length) {
+      playerList.innerHTML = `<div class="draw-card empty"><p>Nenhum jogador encontrado nesse filtro.</p></div>`;
+      return;
+    }
+
+    players.forEach(player => {
+      const slots = availableSlotsFor(player);
+      const already = picked.has(playerKey(player));
+      const disabled = slots.length === 0 || already;
+      const button = document.createElement("button");
+      button.className = "player-card";
+      button.type = "button";
+      button.disabled = disabled;
+      button.innerHTML = `
+        <span class="shirt">${player.shirt_number || player.role}</span>
+        <span>
+          <span class="player-name">${escapeHtml(displayName(player))}</span>
+          <span class="player-meta">${escapeHtml(playerMeta(player))}</span>
+        </span>
+        <span class="player-role">${state.mode === "memory" ? "?" : (player.rating || "--")} · ${player.role}</span>
+      `;
+      button.addEventListener("click", () => selectPlayer(player));
+      playerList.appendChild(button);
     });
   }
 
-  function pickPlayer(player) {
-    const open = availableSlotsFor(player);
-    if (!open.length) return;
-    open[0].player = player;
+  function selectPlayer(player) {
+    const slots = availableSlotsFor(player);
+    if (!slots.length) return;
+    slots[0].player = {
+      ...player,
+      nation: state.currentSquad.nation,
+      year: state.currentSquad.year,
+      tournament: state.currentSquad.tournament,
+    };
+    state.usedSquads.add(state.currentSquad.id);
     state.currentSquad = null;
-    rollTitle.textContent = "Jogador escalado";
-    drawCard.className = "draw-card empty";
-    drawCard.innerHTML = `<p>${escapeHtml(player.name)} entrou no time. Role novamente para buscar a próxima peça.</p>`;
-    playerList.innerHTML = "";
-    skipBtn.disabled = true;
-    renderLineup();
-    saveRunHistory();
+    state.filter = "";
+    playerSearch.value = "";
+    renderAll();
   }
 
-  function skipSquad() {
-    if (state.skips <= 0 || !state.currentSquad) return;
+  function roll() {
+    if (state.finished) return;
+    state.currentSquad = drawSquad();
+    if (state.currentSquad) state.usedSquads.add(state.currentSquad.id);
+    rollTitle.textContent = state.currentSquad ? `${state.currentSquad.nation} ${state.currentSquad.year}` : "Sem elenco compatível";
+    renderAll();
+  }
+
+  function skip() {
+    if (!state.currentSquad || state.skips <= 0) return;
     state.skips -= 1;
-    skipCount.textContent = state.skips;
     state.currentSquad = null;
-    skipBtn.disabled = true;
-    drawCard.className = "draw-card empty";
-    drawCard.innerHTML = "<p>Coringa usado. Role outra seleção.</p>";
-    playerList.innerHTML = "";
-  }
-
-  function simulateTournament(auto = false) {
-    const players = state.lineup.map(s => s.player).filter(Boolean);
-    if (players.length !== state.lineup.length) return;
-    simulationPanel.classList.remove("hidden");
-    matchTimeline.innerHTML = "";
-    resultCard.classList.add("hidden");
-    const overall = Math.round(players.reduce((sum, p) => sum + p.rating, 0) / players.length);
-    const chemistry = calculateChemistry(players);
-    const strength = overall + chemistry * .16 + tacticBonus();
-    const matches = buildCampaign(strength, players);
-    const delay = auto ? 40 : 520;
-    let index = 0;
-    function next() {
-      if (index >= matches.length) return finishCampaign(matches, overall, chemistry);
-      renderMatch(matches[index]);
-      index += 1;
-      setTimeout(next, delay);
-    }
-    next();
-  }
-
-  function tacticBonus() {
-    if (state.tactic === "attack") return 2.5;
-    if (state.tactic === "control") return 1.5;
-    return 2;
-  }
-
-  function buildCampaign(strength, players) {
-    const shuffled = [...opponents].sort(() => Math.random() - .5);
-    const matches = [];
-    let alive = true;
-    for (let i = 0; i < stages.length && alive; i++) {
-      const opponent = shuffled[i % shuffled.length];
-      const opponentPower = 82 + Math.random() * 16 + (i > 2 ? i * 1.7 : 0);
-      const diff = strength - opponentPower;
-      const ourGoals = clamp(Math.round(1.6 + diff / 8 + Math.random() * 2.7), 0, 8);
-      const theirGoals = clamp(Math.round(1.2 - diff / 12 + Math.random() * 2.1), 0, 5);
-      let win = ourGoals > theirGoals;
-      let penalties = false;
-      let finalOur = ourGoals;
-      let finalTheir = theirGoals;
-      if (i > 2 && ourGoals === theirGoals) {
-        penalties = true;
-        win = Math.random() < .52 + diff / 80;
-        finalOur = ourGoals;
-        finalTheir = theirGoals;
-      }
-      if (i <= 2 && matches.filter(m => m.win).length + (win ? 1 : 0) < Math.max(0, i - 1)) alive = false;
-      if (i > 2 && !win) alive = false;
-      matches.push({ stage: stages[i], opponent, ourGoals: finalOur, theirGoals: finalTheir, win, penalties, scorers: pickScorers(players, finalOur), sevenZero: finalOur >= 7 && finalTheir === 0 });
-    }
-    return matches;
-  }
-
-  function renderMatch(match) {
-    const card = document.createElement("div");
-    card.className = "match-card";
-    const left = document.createElement("div");
-    left.innerHTML = `<div class="match-stage">${escapeHtml(match.stage)}${match.penalties ? " · pênaltis" : ""}</div><strong>Agente Fino FC x ${escapeHtml(match.opponent)}</strong><div class="scorers">${match.scorers.length ? `Gols: ${match.scorers.map(escapeHtml).join(", ")}` : "Jogo travado, sem gols do nosso lado."}</div>`;
-    const score = document.createElement("div");
-    score.className = "match-score";
-    score.textContent = `${match.ourGoals}–${match.theirGoals}`;
-    card.append(left, score);
-    matchTimeline.appendChild(card);
-    card.scrollIntoView({ behavior: "smooth", block: "nearest" });
-  }
-
-  function finishCampaign(matches, overall, chemistry) {
-    const wins = matches.filter(m => m.win).length;
-    const goalsFor = matches.reduce((sum, m) => sum + m.ourGoals, 0);
-    const goalsAgainst = matches.reduce((sum, m) => sum + m.theirGoals, 0);
-    const sevenZero = matches.some(m => m.sevenZero);
-    const champion = wins >= 7;
-    resultCard.className = "result-card";
-    resultCard.innerHTML = `
-      <p class="eyebrow">Resultado final</p>
-      <h3>${champion ? "Campeão da Copa dos Sonhos" : wins >= 5 ? "Campanha pesada" : "Eliminação dolorida"}</h3>
-      <p>${sevenZero ? "Você conseguiu o placar mítico: 7x0 ou mais sem sofrer gol." : "Ainda não veio o 7x0 perfeito. Ajuste a formação, química e tente outra vez."}</p>
-      <div class="result-grid">
-        <div class="result-stat"><strong>${wins}</strong><span>vitórias</span></div>
-        <div class="result-stat"><strong>${goalsFor}</strong><span>gols pró</span></div>
-        <div class="result-stat"><strong>${goalsAgainst}</strong><span>gols contra</span></div>
-        <div class="result-stat"><strong>${overall}/${chemistry}</strong><span>OVR/QUI</span></div>
-      </div>`;
-    state.finished = true;
-    saveRunHistory({ wins, goalsFor, goalsAgainst, sevenZero, champion });
-  }
-
-  function pickScorers(players, goals) {
-    const attackers = players.filter(p => p.role === "FW");
-    const creators = players.filter(p => p.role === "MF");
-    const pool = [...attackers, ...attackers, ...creators, ...players];
-    return Array.from({ length: goals }, () => pool[Math.floor(Math.random() * pool.length)]?.name || "Gol contra");
+    renderAll();
   }
 
   function resetGame() {
@@ -328,56 +290,205 @@
     state.usedSquads = new Set();
     state.skips = 3;
     state.finished = false;
-    skipCount.textContent = "3";
-    rollTitle.textContent = "Role o dado";
-    drawCard.className = "draw-card empty";
-    drawCard.innerHTML = "<p>Uma seleção histórica vai aparecer aqui. Escolha um jogador compatível com as vagas abertas.</p>";
-    playerList.innerHTML = "";
-    matchTimeline.innerHTML = "";
+    state.filter = "";
+    playerSearch.value = "";
     simulationPanel.classList.add("hidden");
     resultCard.classList.add("hidden");
-    skipBtn.disabled = true;
-    renderLineup();
+    resultCard.innerHTML = "";
+    matchTimeline.innerHTML = "";
+    renderAll();
   }
 
-  function setFormation(value) {
-    if (!formations[value]) return;
-    state.formation = value;
-    document.querySelectorAll("[data-formation]").forEach(btn => btn.classList.toggle("active", btn.dataset.formation === value));
-    resetGame();
-  }
-  function setMode(value) {
-    state.mode = value;
-    document.querySelectorAll("[data-mode]").forEach(btn => btn.classList.toggle("active", btn.dataset.mode === value));
-    if (state.currentSquad) renderDraw(state.currentSquad);
+  function renderAll() {
+    skipCount.textContent = state.skips;
+    skipBtn.disabled = !state.currentSquad || state.skips <= 0;
     renderLineup();
-  }
-  function setTactic(value) {
-    state.tactic = value;
-    document.querySelectorAll("[data-tactic]").forEach(btn => btn.classList.toggle("active", btn.dataset.tactic === value));
+    renderDrawCard();
+    renderPlayers();
   }
 
-  function saveRunHistory(result = null) {
-    const players = state.lineup.map(s => s.player).filter(Boolean).length;
-    const item = { at: new Date().toISOString(), formation: state.formation, players, result };
+  function tacticalBonus() {
+    const overall = calculateOverall();
+    const chem = calculateChemistry();
+    if (state.tactic === "attack") return overall > 86 ? 5 : -2;
+    if (state.tactic === "control") return chem > 70 ? 4 : -1;
+    return 2;
+  }
+
+  function pickOpponent(roundIndex) {
+    const candidates = state.squads.filter(s => s.players.length >= 15);
+    const squad = candidates[Math.floor(Math.random() * candidates.length)];
+    const base = Number(squad?.strength || 76);
+    return {
+      name: squad ? `${squad.nation} ${squad.year}` : "Adversário histórico",
+      power: Math.round(base + roundIndex * 1.6 + Math.random() * 7),
+    };
+  }
+
+  function simulateScore(opponent, roundIndex) {
+    const overall = calculateOverall();
+    const chem = calculateChemistry();
+    const teamPower = overall + chem * 0.22 + tacticalBonus() + Math.random() * 11;
+    const oppPower = opponent.power + Math.random() * 10;
+    let goalsFor = Math.max(0, Math.round((teamPower - oppPower + 16) / 8 + Math.random() * 2));
+    let goalsAgainst = Math.max(0, Math.round((oppPower - teamPower + 10) / 9 + Math.random() * 1.5));
+
+    if (roundIndex >= 3 && teamPower < oppPower - 5) {
+      goalsFor = Math.min(goalsFor, Math.floor(Math.random() * 2));
+      goalsAgainst = Math.max(goalsAgainst, goalsFor + 1);
+    }
+
+    const sevenChance = Math.max(0, (overall - 88) * 0.025 + (chem - 75) * 0.01 + (state.tactic === "attack" ? 0.05 : 0));
+    if (Math.random() < sevenChance) {
+      goalsFor = 7;
+      goalsAgainst = 0;
+    }
+
+    if (goalsFor === goalsAgainst && roundIndex >= 3) {
+      if (teamPower >= oppPower) goalsFor += 1;
+      else goalsAgainst += 1;
+    }
+
+    return [Math.min(9, goalsFor), Math.min(7, goalsAgainst), teamPower];
+  }
+
+  function simulateCup(auto = false) {
+    if (state.lineup.some(slot => !slot.player)) return;
+    state.finished = true;
+    simulationPanel.classList.remove("hidden");
+    matchTimeline.innerHTML = "";
+    resultCard.classList.add("hidden");
+    resultCard.innerHTML = "";
+
+    const stages = ["Grupo 1", "Grupo 2", "Grupo 3", "Oitavas", "Quartas", "Semifinal", "Final"];
+    let wonCup = true;
+    let sevenZero = false;
+    const rows = [];
+
+    stages.forEach((stage, index) => {
+      const opponent = pickOpponent(index);
+      const [gf, ga] = simulateScore(opponent, index);
+      if (gf === 7 && ga === 0) sevenZero = true;
+      if (index >= 3 && gf < ga) wonCup = false;
+      rows.push({ stage, opponent, gf, ga });
+      if (!wonCup) return;
+    });
+
+    const effectiveRows = [];
+    for (const row of rows) {
+      effectiveRows.push(row);
+      if (["Oitavas", "Quartas", "Semifinal", "Final"].includes(row.stage) && row.gf < row.ga) break;
+    }
+
+    const renderRow = (row, idx) => {
+      const node = document.createElement("div");
+      node.className = "match-row";
+      node.innerHTML = `
+        <span class="match-stage">${row.stage}</span>
+        <strong>Seu time x ${escapeHtml(row.opponent.name)}</strong>
+        <span class="match-score">${row.gf} x ${row.ga}</span>
+      `;
+      matchTimeline.appendChild(node);
+    };
+
+    if (auto) {
+      effectiveRows.forEach(renderRow);
+      renderResult(effectiveRows, wonCup, sevenZero);
+      return;
+    }
+
+    effectiveRows.forEach((row, idx) => {
+      setTimeout(() => {
+        renderRow(row, idx);
+        if (idx === effectiveRows.length - 1) renderResult(effectiveRows, wonCup, sevenZero);
+      }, idx * 520);
+    });
+  }
+
+  function renderResult(rows, wonCup, sevenZero) {
+    const last = rows[rows.length - 1];
+    const title = sevenZero
+      ? "Você achou o 7 a 0."
+      : wonCup
+        ? "Campeão, mas sem massacre."
+        : `Caiu em ${last.stage}.`;
+    const text = sevenZero
+      ? "Seu elenco virou lenda. Time forte, química no ponto e noite perfeita."
+      : wonCup
+        ? "Levantou a taça, mas o 7 a 0 não veio. O jogo ainda pode te cobrar mais precisão."
+        : "Nome pesado não ganha sozinho. A Copa pune química baixa, buracos de posição e azar.";
+    resultCard.classList.remove("hidden");
+    resultCard.innerHTML = `
+      <h3>${title}</h3>
+      <p>${text}</p>
+      <p><strong>OVR:</strong> ${calculateOverall()} · <strong>Química:</strong> ${calculateChemistry()} · <strong>Tática:</strong> ${labelTactic(state.tactic)}</p>
+    `;
+  }
+
+  function labelTactic(tactic) {
+    return { balanced: "Equilibrado", attack: "Ataque total", control: "Controle" }[tactic] || tactic;
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, ch => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;",
+    }[ch]));
+  }
+
+  function bindControls() {
+    document.querySelectorAll("[data-formation]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("[data-formation]").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        state.formation = btn.dataset.formation;
+        resetGame();
+      });
+    });
+
+    document.querySelectorAll("[data-mode]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("[data-mode]").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        state.mode = btn.dataset.mode;
+        renderAll();
+      });
+    });
+
+    document.querySelectorAll("[data-tactic]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("[data-tactic]").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        state.tactic = btn.dataset.tactic;
+        updateStats();
+      });
+    });
+
+    rollBtn.addEventListener("click", roll);
+    skipBtn.addEventListener("click", skip);
+    resetBtn.addEventListener("click", resetGame);
+    simulateBtn.addEventListener("click", () => simulateCup(false));
+    quickSimBtn.addEventListener("click", () => simulateCup(true));
+    playerSearch.addEventListener("input", () => {
+      state.filter = playerSearch.value || "";
+      renderPlayers();
+    });
+  }
+
+  async function init() {
+    bindControls();
+    state.lineup = flattenFormation();
     try {
-      const current = JSON.parse(localStorage.getItem("agente_fino_dream_cup_history") || "[]");
-      current.unshift(item);
-      localStorage.setItem("agente_fino_dream_cup_history", JSON.stringify(current.slice(0, 50)));
-    } catch (_) {}
+      await loadDatabase();
+    } catch (err) {
+      drawCard.className = "draw-card empty";
+      drawCard.innerHTML = `<p>Não consegui carregar o banco do jogo: ${escapeHtml(err.message)}</p>`;
+    }
+    renderAll();
   }
 
-  function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
-  function escapeHtml(value) { return String(value).replace(/[&<>'"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[ch])); }
-
-  document.querySelectorAll("[data-formation]").forEach(btn => btn.addEventListener("click", () => setFormation(btn.dataset.formation)));
-  document.querySelectorAll("[data-mode]").forEach(btn => btn.addEventListener("click", () => setMode(btn.dataset.mode)));
-  document.querySelectorAll("[data-tactic]").forEach(btn => btn.addEventListener("click", () => setTactic(btn.dataset.tactic)));
-  rollBtn.addEventListener("click", rollSquad);
-  skipBtn.addEventListener("click", skipSquad);
-  resetBtn.addEventListener("click", resetGame);
-  simulateBtn.addEventListener("click", () => simulateTournament(false));
-  quickSimBtn.addEventListener("click", () => simulateTournament(true));
-
-  resetGame();
+  init();
 })();
