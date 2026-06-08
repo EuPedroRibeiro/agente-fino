@@ -57,6 +57,9 @@
   const dbSquads = el("dbSquads");
   const dbPlayers = el("dbPlayers");
   const dbSource = el("dbSource");
+  const pickedStat = el("pickedStat");
+  const teamState = el("teamState");
+  const simulateHint = el("simulateHint");
 
   function formatNumber(value) {
     return Number(value || 0).toLocaleString("pt-BR");
@@ -179,9 +182,16 @@
   function updateStats() {
     const overall = calculateOverall();
     const chem = calculateChemistry();
-    overallStat.textContent = `OVR ${overall || "--"}`;
-    chemStat.textContent = `QUI ${chem || "--"}`;
-    simulateBtn.disabled = state.lineup.some(slot => !slot.player);
+    const pickedCount = state.lineup.filter(slot => slot.player).length;
+    const totalSlots = state.lineup.length;
+    const missing = Math.max(0, totalSlots - pickedCount);
+    const complete = missing === 0;
+    if (overallStat) overallStat.textContent = `OVR ${overall || "--"}`;
+    if (chemStat) chemStat.textContent = `QUI ${chem || "--"}`;
+    if (pickedStat) pickedStat.textContent = `${pickedCount}/${totalSlots}`;
+    if (teamState) teamState.textContent = complete ? "Time pronto" : `Faltam ${missing} vaga${missing === 1 ? "" : "s"}`;
+    if (simulateHint) simulateHint.textContent = complete ? "Onze fechado. Simule a campanha e veja se o 7 a 0 aparece." : "Complete os 11 para liberar a simula????o.";
+    if (simulateBtn) { simulateBtn.disabled = !complete; simulateBtn.textContent = complete ? "Simular Copa" : `Faltam ${missing}`; }
   }
 
   function drawSquad() {

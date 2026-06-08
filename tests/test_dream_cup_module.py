@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import json
 from pathlib import Path
@@ -53,6 +53,19 @@ class DreamCupModuleTests(TestCase):
         self.assertIn("simulateCup", js)
         self.assertIn("playerSearch", js)
 
+
+    def test_dream_cup_v3_layout_has_clear_three_zone_flow(self):
+        html = (ROOT / "app" / "templates" / "dream_cup.html").read_text(encoding="utf-8")
+        css = (ROOT / "app" / "static" / "css" / "dream_cup.css").read_text(encoding="utf-8")
+        js = (ROOT / "app" / "static" / "js" / "dream_cup.js").read_text(encoding="utf-8")
+        self.assertIn("dream-cup-v3", html)
+        self.assertIn("flow-steps", html)
+        self.assertIn("summary-board", html)
+        self.assertIn("pickedStat", html)
+        self.assertIn("teamState", html)
+        self.assertIn("Copa dos Sonhos v3", css)
+        self.assertIn("choose-badge", css)
+        self.assertIn("pickedStat", js)
     def test_no_external_assets_or_official_images(self):
         html = (ROOT / "app" / "templates" / "dream_cup.html").read_text(encoding="utf-8")
         css = (ROOT / "app" / "static" / "css" / "dream_cup.css").read_text(encoding="utf-8")
