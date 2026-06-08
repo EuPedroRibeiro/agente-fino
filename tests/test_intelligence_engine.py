@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from datetime import datetime, timezone
 import json
 import os
 import time
@@ -59,8 +60,13 @@ class FinoIntelligenceEngineTests(unittest.TestCase):
             "quem é você?": "identity_query",
             "Que horas são?": "time_query",
             "qual a hora atual?": "time_query",
+            "horário de Brasília": "time_query",
+            "horario de brasilia": "time_query",
+            "qual o horário de Brasília?": "time_query",
+            "hora no Brasil": "time_query",
             "Que dia é hoje?": "date_query",
             "data de hoje": "date_query",
+            "data atual": "date_query",
         }
         for message, expected_intent in cases.items():
             with self.subTest(message=message):
@@ -73,10 +79,16 @@ class FinoIntelligenceEngineTests(unittest.TestCase):
                 self.assertFalse(decision.web_needed)
                 self.assertFalse(decision.rag_needed)
                 self.assertNotIn("Nao consegui concluir esse pedido", decision.direct_answer)
+                self.assertNotIn("Não consegui concluir esse pedido", decision.direct_answer)
 
     def test_local_time_and_date_answers_have_expected_shape(self) -> None:
-        self.assertRegex(answer_time(), r"^Agora são \d{2}:\d{2}\.$")
+        self.assertRegex(answer_time(), r"^Agora são \d{2}:\d{2} no horário de Brasília\.$")
         self.assertRegex(answer_date(), r"^Hoje é .+, \d{1,2} de .+ de \d{4}\.$")
+
+    def test_brazil_timezone_is_used_even_when_server_time_is_utc(self) -> None:
+        utc_now = datetime(2026, 6, 8, 19, 45, tzinfo=timezone.utc)
+        self.assertEqual(answer_time(utc_now), "Agora são 16:45 no horário de Brasília.")
+        self.assertEqual(answer_date(utc_now), "Hoje é segunda-feira, 8 de junho de 2026.")
 
     def test_time_local_failure_uses_specific_local_fallback(self) -> None:
         with patch("app.intelligence.local_responses.answer_time", side_effect=RuntimeError("clock unavailable")):
@@ -84,7 +96,7 @@ class FinoIntelligenceEngineTests(unittest.TestCase):
         self.assertEqual(decision.intent, "time_query")
         self.assertEqual(decision.mode, "FAST")
         self.assertTrue(decision.answer_directly)
-        self.assertEqual(decision.direct_answer, "Não consegui ler o relógio local agora.")
+        self.assertIn("relógio local", decision.direct_answer)
         self.assertNotIn("Não consegui concluir esse pedido", decision.direct_answer)
 
     def test_document_tools_require_document_and_clear_intent(self) -> None:
@@ -155,6 +167,7 @@ class FinoIntelligenceEngineTests(unittest.TestCase):
         for message, expected_intent in (
             ("Qual seu nome?", "identity_query"),
             ("Que horas são?", "time_query"),
+            ("horário de Brasília", "time_query"),
             ("Que dia é hoje?", "date_query"),
         ):
             with self.subTest(message=message):
@@ -177,6 +190,15 @@ class FinoIntelligenceEngineTests(unittest.TestCase):
                 self.assertFalse(response.web_used)
                 self.assertFalse(response.rag_status.get("used"))
 
+    def test_core_time_uses_brasilia_timezone_label(self) -> None:
+        core = NexusCore()
+        with patch("app.agent.core.production_config_errors", return_value=[]):
+            response = core.chat(AgentChatRequest(message="horário de Brasília"))
+        self.assertEqual(response.intent, "time_query")
+        self.assertEqual(response.mode, "FAST")
+        self.assertIn("horário de Brasília", response.final_answer)
+        self.assertNotIn("UTC+0000", response.final_answer)
+
     def test_local_identity_survives_history_failure(self) -> None:
         core = NexusCore()
         core.orchestrator = Mock()
@@ -197,6 +219,7 @@ class FinoIntelligenceEngineTests(unittest.TestCase):
             {
                 "AGENTE_FINO_ENV": "production",
                 "AGENTE_FINO_PUBLIC_MODE": "true",
+                "AGENTE_FINO_DEFAULT_TIMEZONE": "America/Sao_Paulo",
                 "OPENAI_ENABLED": "false",
                 "GEMINI_API_KEY": "",
                 "DOCUMENT_LOOKUP_ENABLED": "false",
@@ -207,11 +230,13 @@ class FinoIntelligenceEngineTests(unittest.TestCase):
             core.orchestrator = Mock()
             core.document_lookup = Mock()
             with patch("app.agent.core.production_config_errors", return_value=[]):
-                for message in ("Qual seu nome?", "Que horas são?", "Que dia é hoje?"):
+                for message in ("Qual seu nome?", "Que horas são?", "horário de Brasília", "Que dia é hoje?"):
                     response = core.chat(AgentChatRequest(message=message))
                     self.assertEqual(response.mode, "FAST")
                     self.assertEqual(response.model_used["provider"], "local-intelligence")
                     self.assertFalse(response.model_used["llm_used"])
+                    if response.intent == "time_query":
+                        self.assertIn("horário de Brasília", response.final_answer)
             core.orchestrator.run.assert_not_called()
             core.document_lookup.handle.assert_not_called()
 
