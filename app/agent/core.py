@@ -17,11 +17,11 @@ from app.agent.observability import langfuse_status, record_run
 from app.agent.orchestrator import AgentOrchestrator
 from app.agent.personality import get_personality, reset_personality, update_personality
 from app.agent.providers.model_router import ModelRouter
-from app.agent.public_data_router import PublicDataRouter
 from app.agent.router import classify_message
 from app.agent.schemas.evidence import EvidenceItem, SourceCitation
 from app.agent.schemas.agent_response import AgentResponse
 from app.agent.schemas.messages import AgentChatRequest, DeepResearchRequest, ResearchRequest
+from app.agent.security.sanitizer import mask_secrets
 from app.agent.state import AgentState
 from app.agent.tools_registry import list_tools
 from app.core.config import settings
@@ -30,7 +30,9 @@ from app.core.runtime import is_cloud
 from app.db import get_database_status
 from app.services.document_lookup import DocumentLookupService
 from app.services.public_data import PublicDataService
-from modules.mcp_brasil import MCPBrasilRouter, MCPBrasilService
+from app.intelligence import FinoIntelligenceEngine
+from app.intelligence.response_builder import apply_decision, decision_metadata
+from modules.mcp_brasil import MCPBrasilService
 
 
 CLOUD_BLOCKED_LOCAL_INTENTS = {
@@ -70,6 +72,7 @@ class NexusCore:
         self.mcp_brasil = MCPBrasilService()
         self.document_lookup = DocumentLookupService()
         self.public_data = PublicDataService()
+        self.intelligence = FinoIntelligenceEngine()
 
     def chat(self, request: AgentChatRequest) -> AgentResponse:
         started = time.perf_counter()
@@ -80,6 +83,7 @@ class NexusCore:
         )
         success = True
         error = None
+        decision = None
         try:
             config_errors = production_config_errors()
             if config_errors:
@@ -101,16 +105,25 @@ class NexusCore:
                     "fallback_reason": "; ".join(config_errors),
                 }
                 return self._to_response(state)
-            if PublicDataRouter.is_parliamentary_expense_query(request.message):
-                return self._chat_with_public_data(request, started)
-            document_result = self.document_lookup.handle(request.message, user_id=request.user_id)
-            if document_result:
-                return self._chat_with_document_lookup(request, document_result, started)
-            if PublicDataRouter.should_use_public_data(request.message):
-                return self._chat_with_public_data(request, started)
-            if MCPBrasilRouter.should_use_mcp_brasil(request.message):
-                return self._chat_with_mcp_brasil(request, started)
-            route = classify_message(request.message)
+            decision = self.intelligence.decide(request.message)
+            apply_decision(state, decision)
+            if decision.answer_directly:
+                return self._chat_with_intelligence_direct(request, decision, started)
+            if decision.execution_intent == "public_data_query":
+                response = self._chat_with_public_data(request, started)
+                response.intelligence = decision_metadata(decision)
+                return response
+            if decision.execution_intent in {"cpf_lookup", "cpf_validate", "cpf_lab_lookup", "cnpj_lookup"}:
+                document_result = self.document_lookup.handle(request.message, user_id=request.user_id)
+                if document_result:
+                    response = self._chat_with_document_lookup(request, document_result, started)
+                    response.intelligence = decision_metadata(decision)
+                    return response
+            if decision.execution_intent == "mcp_brasil":
+                response = self._chat_with_mcp_brasil(request, started)
+                response.intelligence = decision_metadata(decision)
+                return response
+            route = decision.route or classify_message(request.message)
             if is_cloud() and route.get("intent") in CLOUD_BLOCKED_LOCAL_INTENTS:
                 state.intent = route.get("intent") or "cloud_local_tool_blocked"
                 state.category = route.get("category") or "cloud"
@@ -131,6 +144,7 @@ class NexusCore:
                     "fallback": False,
                     "fallback_reason": "Ferramenta local bloqueada no runtime cloud.",
                 }
+                apply_decision(state, decision)
                 conversation_logs.add_message(conversation_id=state.conversation_id, role="user", content=state.user_message)
                 conversation_logs.add_message(
                     conversation_id=state.conversation_id,
@@ -144,7 +158,8 @@ class NexusCore:
                     latency_ms=0,
                 )
                 return self._to_response(state)
-            state = self.orchestrator.run(request)
+            state = self.orchestrator.run(request, decision=decision)
+            apply_decision(state, decision)
             model = state.model_used or {}
             conversation_logs.add_message(
                 conversation_id=state.conversation_id,
@@ -176,10 +191,62 @@ class NexusCore:
             success = False
             error = str(exc)
             state.errors.append(error)
-            state.final_answer = "Falha interna no Agente Fino. O erro foi registrado para diagnostico."
-            state.confidence = 0.1
+            if decision is None:
+                decision = self.intelligence.decide(request.message)
+            apply_decision(state, decision)
+            state.intent = decision.intent
+            state.category = decision.category
+            state.mode = "SAFE_ERROR"
+            state.final_answer = decision.fallback_answer
+            state.confidence = max(0.2, min(decision.confidence, 0.6))
         latency_ms = int((time.perf_counter() - started) * 1000)
         record_run(state, latency_ms=latency_ms, success=success, error=error)
+        return self._to_response(state)
+
+    def _chat_with_intelligence_direct(self, request: AgentChatRequest, decision, started: float) -> AgentResponse:
+        latency_ms = int((time.perf_counter() - started) * 1000)
+        state = AgentState(
+            conversation_id=request.conversation_id or str(uuid4()),
+            user_id=request.user_id,
+            user_message=request.message,
+            intent=decision.intent,
+            category=decision.category,
+            mode=decision.mode,
+            final_answer=decision.direct_answer or decision.fallback_answer,
+            plan=decision.plan,
+            selected_tools=[],
+            web_used=False,
+            web_status={"used": False, "skipped": "fino_intelligence_direct"},
+            rag_status={"used": False, "skipped": "fino_intelligence_direct"},
+            model_used={
+                "provider": "fino-local",
+                "model": "intelligence-direct",
+                "used_model": False,
+                "llm_used": False,
+                "used_web": False,
+                "used_rag": False,
+                "used_verifier": False,
+                "router": decision.router,
+                "reason": decision.reason,
+            },
+            risk_level=decision.risk_level,
+            confidence=decision.confidence,
+            timings_ms={"total": latency_ms, "router": latency_ms},
+        )
+        apply_decision(state, decision)
+        conversation_logs.add_message(conversation_id=state.conversation_id, role="user", content=state.user_message)
+        conversation_logs.add_message(
+            conversation_id=state.conversation_id,
+            role="assistant",
+            content=state.final_answer,
+            provider=state.model_used["provider"],
+            model=state.model_used["model"],
+            intent=state.intent,
+            tools_used=[],
+            web_sources_count=0,
+            latency_ms=latency_ms,
+        )
+        record_run(state, latency_ms=latency_ms, success=True, error=None)
         return self._to_response(state)
 
     def _chat_with_document_lookup(self, request: AgentChatRequest, result: dict, started: float) -> AgentResponse:
@@ -577,8 +644,9 @@ class NexusCore:
             needs_confirmation=state.needs_confirmation,
             pending_actions=state.pending_actions,
             warnings=state.warnings,
-            errors=state.errors,
+            errors=mask_secrets(state.errors),
             timings_ms=state.timings_ms,
+            intelligence=state.system_context.get("intelligence", {}),
         )
 
     def _derive_queries(self, query: str, depth: str) -> list[str]:

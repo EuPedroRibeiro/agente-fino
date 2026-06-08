@@ -272,6 +272,7 @@ function renderRisk(data) {
   const model = data.model_used || {};
   const rag = data.rag_status || {};
   const web = data.web_status || {};
+  const intelligence = data.intelligence || {};
   const totalMs = data.timings_ms?.total || "";
   const localMs = data.timings_ms?.local_tool ?? model.local_tool_latency_ms ?? "";
   const tools = data.selected_tools?.length ? data.selected_tools.join(", ") : "--";
@@ -280,6 +281,8 @@ function renderRisk(data) {
     <div>Confianca: ${Math.round(Number(data.confidence || 0) * 100)}%</div>
     <div>Modo: ${escapeHtml(data.mode || "--")}</div>
     <div>Intent: ${escapeHtml(data.intent || "--")}</div>
+    <div>Router: ${escapeHtml(intelligence.router || model.router || "--")}</div>
+    <div>Motivo: ${escapeHtml(intelligence.reason || model.reason || "--")}</div>
     <div>Ferramenta: ${escapeHtml(tools)}</div>
     <div>Modelo usado: ${escapeHtml(model.provider || "--")} ${model.model ? `(${escapeHtml(model.model)})` : ""}</div>
     <div>LLM usado: ${model.used_model || model.llm_used ? "sim" : "nao"}</div>
@@ -289,6 +292,10 @@ function renderRisk(data) {
     ${model.timeout != null ? `<div>Timeout: ${model.timeout ? "sim" : "nao"}</div>` : ""}
     ${model.skipped_count != null ? `<div>Ignorados: ${escapeHtml(model.skipped_count)}</div>` : ""}
     <div>RAG: ${escapeHtml(rag.honest_status || "--")} ${rag.chunks ? `- ${escapeHtml(rag.chunks)} chunks` : ""}</div>
+    <div>Memoria necessaria: ${intelligence.memory_needed ? "sim" : "nao"}</div>
+    <div>Web necessaria: ${intelligence.web_needed ? "sim" : "nao"}</div>
+    ${intelligence.blocked_tools?.length ? `<div>Bloqueios: ${escapeHtml(intelligence.blocked_tools.join(", "))}</div>` : ""}
+    ${data.errors?.length ? `<div>Erro sanitizado: ${escapeHtml(data.errors[0])}</div>` : ""}
     <div>Web fontes: ${escapeHtml(web.sources_read ?? data.sources?.length ?? 0)}</div>
     <div>Ferramenta local: ${escapeHtml(localMs || "--")} ms</div>
     <div>Tempo: ${escapeHtml(totalMs || "--")} ms</div>
@@ -365,7 +372,10 @@ async function sendMessage(message = null) {
     conversation_id: conversationId,
   };
   try {
-    const data = await runWithActivity(payload).catch(() => postChat(payload));
+    const data = await runWithActivity(payload).catch((error) => {
+      if (error.allowPostFallback) return postChat(payload);
+      throw error;
+    });
     pending.remove();
     renderResponse(data);
     if (ui.latencyHint) ui.latencyHint.textContent = `${Math.round(performance.now() - started)} ms`;
@@ -407,15 +417,27 @@ async function postChat(payload) {
 }
 
 async function runWithActivity(payload) {
-  if (!window.EventSource) throw new Error("SSE indisponivel.");
+  if (!window.EventSource) {
+    const error = new Error("SSE indisponivel.");
+    error.allowPostFallback = true;
+    throw error;
+  }
   const response = await fetch("/api/agent/runs", {
     method: "POST",
     headers: { "Content-Type": "application/json; charset=utf-8" },
     body: JSON.stringify(payload),
   });
   const data = await readJsonResponse(response);
-  if (!response.ok) throw new Error(errorMessageFromPayload(data, "Execucao em streaming indisponivel."));
-  if (!data.run_id) throw new Error("Execucao sem identificador.");
+  if (!response.ok) {
+    const error = new Error(errorMessageFromPayload(data, "Execucao em streaming indisponivel."));
+    error.allowPostFallback = true;
+    throw error;
+  }
+  if (!data.run_id) {
+    const error = new Error("Execucao sem identificador.");
+    error.allowPostFallback = true;
+    throw error;
+  }
   return streamRunEvents(data.run_id);
 }
 
@@ -480,6 +502,10 @@ function streamRunEvents(runId) {
     });
     source.addEventListener("run_error", (event) => {
       const payload = dataFrom(event);
+      if (payload.response) {
+        finish(payload.response, true);
+        return;
+      }
       finish(new Error(payload.error || "Nao consegui concluir a execucao."));
     });
     source.onerror = () => finish(new Error("Conexao de atividade interrompida."));

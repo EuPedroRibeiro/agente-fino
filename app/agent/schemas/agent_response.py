@@ -33,3 +33,4 @@ class AgentResponse(BaseModel):
     warnings: list[str] = Field(default_factory=list)
     errors: list[str] = Field(default_factory=list)
     timings_ms: dict[str, int] = Field(default_factory=dict)
+    intelligence: dict[str, Any] = Field(default_factory=dict)

@@ -14,8 +14,6 @@ from app.agent.intelligence.autonomy import autonomy_status
 from app.agent.intelligence.learning_store import LearningStore
 from app.agent.intelligence.task_manager import create_task, list_tasks
 from app.agent.memory_graph import add_node, search_nodes
-from app.agent.public_data_router import PublicDataRouter
-from app.agent.router import classify_message
 from app.agent.security.sanitizer import mask_secrets
 from app.agent.schemas.messages import (
     AgentChatRequest,
@@ -41,7 +39,6 @@ from app.security.audit import audit_event, read_audit_events
 from app.security.config import security_settings
 from app.security.input_validation import validate_chat_message, validate_path_text, validate_title
 from app.services.disk_usage import get_disk_usage_ranking
-from modules.mcp_brasil import MCPBrasilRouter
 
 
 router = APIRouter(tags=["agent"])
@@ -305,18 +302,11 @@ def agent_run_events(run_id: str) -> StreamingResponse:
         started = time.perf_counter()
         payload: AgentChatRequest = run["payload"]
         try:
-            route = classify_message(payload.message)
-            if PublicDataRouter.should_use_public_data(payload.message):
-                plan = PublicDataRouter.plan_query(payload.message)
-                route = {
-                    "intent": "public_data_query",
-                    "category": "public_data",
-                    "topic": plan.topic,
-                    "tool": plan.tool_name,
-                }
-            elif route.get("intent") not in {"cpf_lookup", "cpf_validate", "cpf_lab_lookup", "cnpj_lookup"} and MCPBrasilRouter.should_use_mcp_brasil(payload.message):
-                plan = MCPBrasilRouter.plan_query(payload.message)
-                route = {"intent": "mcp_brasil", "category": "public_data_br", "tool": plan.tool_name}
+            decision = core.intelligence.decide(payload.message)
+            route = dict(decision.route)
+            route["intent"] = decision.execution_intent
+            route["category"] = decision.category
+            route["tool"] = route.get("tool") or (decision.selected_tools[0] if decision.selected_tools else None)
             yield _sse("run_started", {"run_id": run_id, "message": "Pensando..."})
             yield _sse(
                 "route_detected",
@@ -325,6 +315,9 @@ def agent_run_events(run_id: str) -> StreamingResponse:
                     "intent": route.get("intent"),
                     "category": route.get("category"),
                     "path": route.get("path"),
+                    "confidence": decision.confidence,
+                    "router": decision.router,
+                    "reason": decision.reason,
                     "message": _activity_message_for_route(route),
                 },
             )
@@ -371,15 +364,27 @@ def agent_run_events(run_id: str) -> StreamingResponse:
         except Exception as exc:
             elapsed_ms = int((time.perf_counter() - started) * 1000)
             error = mask_secrets(str(exc))
-            run.update({"status": "error", "error": error, "elapsed_ms": elapsed_ms})
-            yield _sse("run_error", {"run_id": run_id, "elapsed_ms": elapsed_ms, "error": error, "message": "Nao consegui concluir a execucao."})
+            response = _friendly_chat_error_response(payload).model_dump()
+            response["activity"] = {"elapsed_ms": elapsed_ms, "elapsed_label": _elapsed_label(elapsed_ms)}
+            run.update({"status": "error", "error": error, "elapsed_ms": elapsed_ms, "final": response})
+            yield _sse(
+                "run_error",
+                {
+                    "run_id": run_id,
+                    "elapsed_ms": elapsed_ms,
+                    "error": error,
+                    "message": "A execucao terminou com fallback seguro.",
+                    "response": response,
+                },
+            )
 
     return StreamingResponse(stream(), media_type="text/event-stream; charset=utf-8")
 
 
 def _friendly_chat_error_response(payload: AgentChatRequest) -> AgentResponse:
     conversation_id = payload.conversation_id or f"conv-{uuid4().hex[:10]}"
-    answer = "Nao consegui concluir essa consulta agora. O erro foi registrado com seguranca; tente novamente em instantes."
+    decision = core.intelligence.decide(payload.message)
+    answer = decision.fallback_answer
     return AgentResponse(
         conversation_id=conversation_id,
         answer=answer,
@@ -394,6 +399,20 @@ def _friendly_chat_error_response(payload: AgentChatRequest) -> AgentResponse:
         confidence=1.0,
         warnings=["A execucao falhou sem expor dados sensiveis."],
         timings_ms={"total": 0},
+        intelligence={
+            "router": decision.router,
+            "reason": decision.reason,
+            "intent": decision.intent,
+            "mode": decision.mode,
+            "confidence": decision.confidence,
+            "risk_level": decision.risk_level,
+            "selected_tools": decision.selected_tools,
+            "blocked_tools": decision.blocked_tools,
+            "web_needed": decision.web_needed,
+            "rag_needed": decision.rag_needed,
+            "memory_needed": decision.memory_needed,
+            "requires_confirmation": decision.requires_confirmation,
+        },
     )
 
 

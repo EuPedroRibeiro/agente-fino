@@ -133,7 +133,7 @@ class AgentOrchestrator:
         self.memory = AgentMemory()
         self.router = ModelRouter()
 
-    def run(self, request) -> AgentState:
+    def run(self, request, decision=None) -> AgentState:
         state = AgentState(
             conversation_id=request.conversation_id or str(uuid4()),
             user_id=request.user_id,
@@ -141,7 +141,10 @@ class AgentOrchestrator:
         )
         started = time.perf_counter()
         state.normalized_message = normalize_for_intent(request.message)
-        classification = classify_message(request.message)
+        classification = dict(decision.route) if decision is not None else classify_message(request.message)
+        if decision is not None:
+            classification["intent"] = decision.execution_intent
+            classification["category"] = decision.category
         state.intent = classification["intent"]
         state.category = classification["category"]
         if classification.get("path"):
@@ -170,6 +173,13 @@ class AgentOrchestrator:
             state.web_needed = web_needed(request.message, state.intent)
 
         selected_tools = self._select_tools(state, use_web=request.use_web)
+        if decision is not None:
+            authorized = set(decision.selected_tools)
+            denied = [tool for tool in selected_tools if tool not in authorized]
+            selected_tools = [tool for tool in selected_tools if tool in authorized]
+            if denied:
+                state.system_context["intelligence_tool_denials"] = denied
+                state.warnings.append("Ferramentas fora da decisao autorizada foram bloqueadas.")
         state.selected_tools = selected_tools
         state.mode = _logical_mode_for(state, selected_tools, providers)
         providers = self.router.provider_chain_for_mode(state.mode)
@@ -1202,11 +1212,6 @@ def _should_fast_path(state: AgentState, request) -> bool:
 def _instant_fast_reply(state: AgentState, router: ModelRouter) -> str | None:
     text = state.normalized_message.strip().lower()
     if text not in FAST_PATH_MESSAGES:
-        return None
-    openai_ready = router.openai_responses.is_configured() and not STATUS_CACHE.is_cooling_down(router.openai_responses.name)
-    gemini_cached = STATUS_CACHE.get_status(router.gemini.name)
-    gemini_ready = bool(gemini_cached and gemini_cached.get("available") and not STATUS_CACHE.is_cooling_down(router.gemini.name))
-    if openai_ready or gemini_ready:
         return None
     if text in {"obrigado", "obrigada", "valeu"}:
         return "Fechado. Quando precisar, me chama."
