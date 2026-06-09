@@ -196,12 +196,82 @@ class DreamCupModuleTests(TestCase):
         self.assertEqual(result["strong"]["goalsFor"], 7)
         self.assertFalse(result["weak"]["sevenZero"])
 
+    def test_finished_run_saves_full_lineup_matches_and_stats(self):
+        result = self.run_game_js("""(() => {
+          const make=(role,index)=>({
+            name:'Jogador '+index,role,rating:88+index%4,nation:'Brasil',year:2002,
+            role_label:'Função '+role,shirt_number:index+1,trait_label:'Traço '+index
+          });
+          const lineup=[
+            {pos:'GK',player:make('GK',0)},{pos:'CB',player:make('DF',1)},{pos:'CB',player:make('DF',2)},
+            {pos:'LB',player:make('DF',3)},{pos:'RB',player:make('DF',4)},{pos:'CM',player:make('MF',5)},
+            {pos:'CM',player:make('MF',6)},{pos:'AM',player:make('MF',7)},{pos:'LW',player:make('FW',8)},
+            {pos:'ST',player:make('FW',9)},{pos:'RW',player:make('FW',10)}
+          ];
+          const plan=game.simulateCampaign(lineup,'balanced',{
+            group:{randomValues:[.99,.99,.99],opponentPowers:[60,61,62]},
+            knockout:{randomValues:[.99,.99,.99,.99],opponentPowers:[70,72,74,76]}
+          });
+          const state=game.createGameState({
+            phase:'campaign',lineup,campaign:{...plan,visibleMatches:[...plan.matches],revealed:plan.matches.length},
+            stats:{overall:90,chemistry:82,fit:96}
+          });
+          const finished=game.dispatch({type:game.ACTIONS.FINISH_CAMPAIGN},state);
+          return {finished,phase:state.phase,run:state.finishedRun};
+        })()""")
+        self.assertTrue(result["finished"])
+        self.assertEqual(result["phase"], "result")
+        run = result["run"]
+        self.assertEqual(len(run["lineup"]), 11)
+        self.assertGreaterEqual(len(run["matches"]), 4)
+        for key in ("id", "createdAt", "result", "stats", "lineup", "matches", "sevenZero", "reason"):
+            self.assertIn(key, run)
+        for key in ("slot", "name", "nation", "year", "rating", "role_label", "shirt_number", "trait_label", "fitScore"):
+            self.assertIn(key, run["lineup"][0])
+        for match in run["matches"]:
+            for key in ("stage", "opponent", "opponentPower", "teamPower", "goalsFor", "goalsAgainst", "outcome"):
+                self.assertIn(key, match)
+
+    def test_run_history_is_limited_to_ten_and_uses_expected_storage_key(self):
+        files = self.game_files()
+        self.assertIn("dream_cup_run_history_v1", files["js"])
+        result = self.run_game_js("""(() => {
+          let history=[];
+          for(let index=0;index<12;index+=1) history=game.mergeRunHistory(history,{id:'run-'+index});
+          return {length:history.length,first:history[0].id,last:history[history.length-1].id};
+        })()""")
+        self.assertEqual(result["length"], 10)
+        self.assertEqual(result["first"], "run-11")
+        self.assertEqual(result["last"], "run-2")
+
+    def test_campaign_and_result_phases_block_draft_actions(self):
+        result = self.run_game_js("""(() => {
+          const squad={id:'br-02',nation:'Brasil',year:2002,players:[{name:'Goleiro',role:'GK',rating:85}]};
+          const campaign=game.createGameState({phase:'campaign'});
+          const finished=game.createGameState({phase:'result'});
+          return {
+            campaignRoll:game.dispatch({type:game.ACTIONS.ROLL_SQUAD,squad},campaign),
+            resultRoll:game.dispatch({type:game.ACTIONS.ROLL_SQUAD,squad},finished),
+            campaignPick:game.dispatch({type:game.ACTIONS.PICK_PLAYER,player:squad.players[0]},campaign),
+            resultPick:game.dispatch({type:game.ACTIONS.PICK_PLAYER,player:squad.players[0]},finished)
+          };
+        })()""")
+        self.assertFalse(result["campaignRoll"])
+        self.assertFalse(result["resultRoll"])
+        self.assertFalse(result["campaignPick"])
+        self.assertFalse(result["resultPick"])
+
     def test_ui_is_a_game_screen_with_hud_deck_field_campaign_and_result(self):
         files = self.game_files()
         for marker in ("game-hud", "draft-board", "field-board", "campaign-board", "resultScreen", "progress-panel"):
             self.assertIn(marker, files["html"])
+        for marker in ("Minha escalação", "Jogos da campanha", "Estatísticas da run", "Histórico recente", "resultLineup", "resultMatches", "runHistory"):
+            self.assertIn(marker, files["html"])
         for marker in (".player-avatar", ".rarity-legendary", ".slot.selected", ".slot.compatible-slot", ".phase-campaign .draft-board", ".result-screen"):
             self.assertIn(marker, files["css"])
+        self.assertIn(".phase-campaign #simulateBtn", files["css"])
+        self.assertIn(".phase-result .draft-board", files["css"])
+        self.assertIn("Nova run", files["html"])
         self.assertIn("overflow:hidden", files["css"])
         self.assertIn("text-overflow:ellipsis", files["css"])
         self.assertIn("white-space:nowrap", files["css"])

@@ -68,13 +68,29 @@
     </section>
 
     <section id="resultScreen" class="result-screen hidden" aria-live="polite">
-      <div class="result-trophy" aria-hidden="true">◆</div>
-      <span class="eyebrow">Fim da campanha</span>
-      <h2 id="resultTitle">Resultado</h2>
-      <p id="resultReason"></p>
-      <div id="resultStats" class="result-stats"></div>
-      <div id="resultAchievements" class="result-achievements"></div>
-      <button id="resultResetBtn" class="primary-btn" type="button">Jogar outra run</button>
+      <header class="result-header">
+        <div class="result-trophy" aria-hidden="true">◆</div>
+        <div><span class="eyebrow">Ficha da run</span><h2 id="resultTitle">Resultado</h2><p id="resultReason"></p></div>
+        <button id="resultResetBtn" class="primary-btn" type="button">Nova run</button>
+      </header>
+      <nav class="result-tabs" aria-label="Relatório da campanha">
+        <button class="result-tab active" data-result-tab="result" type="button">Resultado</button>
+        <button class="result-tab" data-result-tab="lineup" type="button">Minha escalação</button>
+        <button class="result-tab" data-result-tab="matches" type="button">Jogos</button>
+        <button class="result-tab" data-result-tab="statistics" type="button">Estatísticas</button>
+        <button class="result-tab" data-result-tab="history" type="button">Histórico recente</button>
+      </nav>
+      <div class="result-content">
+        <section class="result-tab-panel" data-result-panel="result">
+          <div id="resultStats" class="result-stats"></div>
+          <div id="resultAchievements" class="result-achievements"></div>
+          <p class="report-help">Abra as abas para rever a escalação completa, todos os jogos e as últimas runs.</p>
+        </section>
+        <section class="result-tab-panel hidden" data-result-panel="lineup"><h3>Minha escalação</h3><div id="resultLineup" class="run-lineup-grid"></div></section>
+        <section class="result-tab-panel hidden" data-result-panel="matches"><h3>Jogos da campanha</h3><div id="resultMatches" class="run-match-list"></div></section>
+        <section class="result-tab-panel hidden" data-result-panel="statistics"><h3>Estatísticas da run</h3><div id="resultStatistics"></div></section>
+        <section class="result-tab-panel hidden" data-result-panel="history"><h3>Histórico recente</h3><div id="runHistory" class="run-history-list"></div></section>
+      </div>
     </section>
 
     <footer class="data-credit"><span id="dbSource">Banco local da Copa dos Sonhos</span><span>Elencos reais; ratings e características são derivados pelo jogo.</span></footer>

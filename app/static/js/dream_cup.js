@@ -11,6 +11,7 @@
   const KNOCKOUT_STAGES = ["Oitavas", "Quartas", "Semifinal", "Final"];
   const OPPONENT_RANGES = [[76, 84], [78, 86], [80, 88], [84, 90], [87, 93], [90, 96], [92, 98]];
   const PROGRESS_KEY = "dream_cup_progress_v1";
+  const RUN_HISTORY_KEY = "dream_cup_run_history_v1";
   const POSITION_ICONS = { GK: "▣", DF: "◆", MF: "✦", FW: "⚡" };
   const ACTIONS = {
     BOOT_GAME: "BOOT_GAME",
@@ -285,6 +286,62 @@
     return { matches, groupTable: group.table, qualified: true, sevenZero: group.sevenZero || knockout.sevenZero, result };
   }
 
+  function matchOutcome(match) {
+    if (match.goalsFor > match.goalsAgainst) return "win";
+    if (match.goalsFor === match.goalsAgainst) return "draw";
+    return "loss";
+  }
+
+  function buildFinishedRun(gameState) {
+    const campaign = gameState.campaign || { matches: [], groupTable: {} };
+    const groupTable = campaign.groupTable || {};
+    const matches = (campaign.matches || []).map((match) => ({
+      stage: match.stage,
+      opponent: match.opponent,
+      opponentPower: Number(match.opponentPower || 0),
+      teamPower: Number(match.teamPower || 0),
+      goalsFor: Number(match.goalsFor || 0),
+      goalsAgainst: Number(match.goalsAgainst || 0),
+      outcome: matchOutcome(match),
+      sevenZero: Boolean(match.sevenZero),
+    }));
+    const goalsFor = matches.reduce((sum, match) => sum + match.goalsFor, 0);
+    const goalsAgainst = matches.reduce((sum, match) => sum + match.goalsAgainst, 0);
+    return {
+      id: `run-${gameState.runSeed}-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      result: { ...(gameState.result || campaign.result || {}) },
+      stats: {
+        overall: Number(gameState.stats?.overall || Math.round(lineupOverall(gameState.lineup))),
+        chemistry: Number(gameState.stats?.chemistry || lineupChemistry(gameState.lineup)),
+        fit: Number(gameState.stats?.fit || positionMetrics(gameState.lineup).fitPercent),
+        points: Number(groupTable.points || 0),
+        balance: goalsFor - goalsAgainst,
+        goalsFor,
+        goalsAgainst,
+      },
+      lineup: gameState.lineup.filter((slot) => slot.player).map((slot) => ({
+        slot: slot.pos,
+        name: slot.player.name,
+        nation: slot.player.nation,
+        year: slot.player.year,
+        rating: Number(slot.player.rating || 0),
+        role_label: slot.player.role_label || roleLabel(slot.player.role),
+        shirt_number: slot.player.shirt_number || null,
+        trait_label: slot.player.trait_label || roleLabel(slot.player.role),
+        fitScore: slotCompatibilityScore(slot.player, slot.pos),
+      })),
+      matches,
+      sevenZero: Boolean(campaign.sevenZero),
+      reason: gameState.result?.reason || campaign.result?.reason || "",
+    };
+  }
+
+  function mergeRunHistory(history, run) {
+    if (!run) return Array.isArray(history) ? history.slice(0, 10) : [];
+    return [run, ...(Array.isArray(history) ? history.filter((item) => item?.id !== run.id) : [])].slice(0, 10);
+  }
+
   function emptyProgress() {
     return { runs: 0, bestCampaign: "Nenhuma", highestOverall: 0, highestChemistry: 0, highestFit: 0, sevenZeroFound: false, titles: 0, achievements: [] };
   }
@@ -303,6 +360,10 @@
       selectedPlayer: null,
       campaign: null,
       result: null,
+      finishedRun: null,
+      runHistory: [],
+      selectedReportRun: null,
+      activeResultTab: "result",
       achievements: [],
       stats: { overall: 0, chemistry: 0, fit: 0 },
       runSeed: Date.now(),
@@ -359,10 +420,11 @@
     }
     if (type === ACTIONS.START_RUN || type === ACTIONS.RESET_RUN) {
       const progress = gameState.progress || emptyProgress();
+      const runHistory = gameState.runHistory || [];
       const database = gameState.database;
       const squads = gameState.squads;
       const formation = action.formation || gameState.formation || "4-3-3";
-      Object.assign(gameState, createGameState({ phase: "draft", database, squads, formation, mode: gameState.mode, tactic: gameState.tactic, progress }));
+      Object.assign(gameState, createGameState({ phase: "draft", database, squads, formation, mode: gameState.mode, tactic: gameState.tactic, progress, runHistory }));
       return true;
     }
     if (type === ACTIONS.ROLL_SQUAD) {
@@ -457,6 +519,9 @@
       if (gameState.phase !== "campaign" || !gameState.campaign || gameState.campaign.revealed < gameState.campaign.matches.length) return false;
       gameState.phase = "result";
       gameState.result = gameState.campaign.result;
+      gameState.finishedRun = buildFinishedRun(gameState);
+      gameState.selectedReportRun = null;
+      gameState.activeResultTab = "result";
       gameState.notice = gameState.result.title;
       return true;
     }
@@ -506,6 +571,21 @@
     localStorage.setItem(PROGRESS_KEY, JSON.stringify(state.progress));
   }
 
+  function loadRunHistory() {
+    if (typeof localStorage === "undefined") return [];
+    try {
+      const history = JSON.parse(localStorage.getItem(RUN_HISTORY_KEY) || "[]");
+      return Array.isArray(history) ? history.slice(0, 10) : [];
+    } catch (_error) {
+      return [];
+    }
+  }
+
+  function saveFinishedRun(run) {
+    state.runHistory = mergeRunHistory(state.runHistory, run);
+    if (typeof localStorage !== "undefined") localStorage.setItem(RUN_HISTORY_KEY, JSON.stringify(state.runHistory));
+  }
+
   function updateProgress() {
     const progress = state.progress;
     progress.runs += 1;
@@ -542,6 +622,9 @@
     determineGroupQualification,
     simulateKnockout,
     simulateCampaign,
+    matchOutcome,
+    buildFinishedRun,
+    mergeRunHistory,
   };
   if (typeof module !== "undefined" && module.exports) module.exports = gameApi;
   if (typeof document === "undefined") return;
@@ -553,7 +636,7 @@
     "skipCount", "simulateBtn", "resetBtn", "resultResetBtn", "matchTimeline", "playerSearch", "dbSource", "optionsToggle",
     "optionsPanel", "draftStatus", "lineupStatus", "lineup", "draftLockBadge", "cancelMoveBtn", "campaignPhase", "campaignTitle",
     "groupPoints", "groupBalance", "groupGames", "simulateHint", "resultScreen", "resultTitle", "resultReason", "resultStats",
-    "resultAchievements", "progressRuns", "achievementList",
+    "resultAchievements", "resultLineup", "resultMatches", "resultStatistics", "runHistory", "progressRuns", "achievementList",
   ].map((id) => [id, el(id)]));
 
   async function fetchJson(url) {
@@ -648,7 +731,7 @@
   }
 
   function matchClass(match) {
-    return match.goalsFor > match.goalsAgainst ? "win" : match.goalsFor === match.goalsAgainst ? "draw" : "loss";
+    return matchOutcome(match);
   }
 
   function renderCampaign() {
@@ -661,8 +744,13 @@
     dom.campaignTitle.textContent = state.campaign?.revealed > 3 ? "Mata-mata" : "Rumo à final";
     const complete = state.lineup.every((slot) => slot.player);
     dom.simulateBtn.disabled = !complete || state.phase === "campaign" || state.phase === "result";
-    dom.simulateBtn.textContent = complete ? "Começar campanha" : `Faltam ${state.lineup.filter((slot) => !slot.player).length}`;
-    dom.simulateHint.textContent = complete ? "Time fechado. A Copa vai testar força, química e encaixe." : "Complete o onze para começar a campanha.";
+    dom.simulateBtn.classList.toggle("hidden", state.phase === "campaign" || state.phase === "result");
+    dom.simulateBtn.textContent = state.phase === "campaign" ? "Simulando..." : complete ? "Começar campanha" : `Faltam ${state.lineup.filter((slot) => !slot.player).length}`;
+    dom.simulateHint.textContent = state.phase === "campaign"
+      ? "Campanha em andamento. O draft está bloqueado."
+      : state.phase === "result"
+        ? "Run encerrada. Abra a ficha completa acima."
+        : complete ? "Time fechado. A Copa vai testar força, química e encaixe." : "Complete o onze para começar a campanha.";
     const matches = state.campaign?.visibleMatches || [];
     dom.matchTimeline.innerHTML = matches.length ? "" : '<p class="empty-copy">Os placares aparecerão aqui.</p>';
     matches.forEach((match) => {
@@ -679,13 +767,52 @@
     dom.achievementList.innerHTML = definitions.slice(0, 5).map(([id, label]) => `<span class="${state.progress.achievements.includes(id) ? "unlocked" : ""}" title="${escapeHtml(label)}">${state.progress.achievements.includes(id) ? "★" : "☆"}</span>`).join("");
   }
 
+  function fitLabel(score) {
+    return score === 1 ? "Natural" : score === 0.8 ? "Secundário" : "Improvisado";
+  }
+
+  function resultLabel(run) {
+    return run?.result?.title || run?.result?.code || "Run encerrada";
+  }
+
+  function renderResultTabs() {
+    document.querySelectorAll("[data-result-tab]").forEach((button) => button.classList.toggle("active", button.dataset.resultTab === state.activeResultTab));
+    document.querySelectorAll("[data-result-panel]").forEach((panel) => panel.classList.toggle("hidden", panel.dataset.resultPanel !== state.activeResultTab));
+  }
+
+  function renderRunDetails(run) {
+    if (!run) return;
+    dom.resultTitle.textContent = resultLabel(run);
+    dom.resultReason.textContent = run.reason || "A campanha terminou.";
+    dom.resultStats.innerHTML = `<span><small>OVR</small><strong>${run.stats.overall}</strong></span><span><small>Química</small><strong>${run.stats.chemistry}</strong></span><span><small>Encaixe</small><strong>${run.stats.fit}%</strong></span><span><small>Pontos</small><strong>${run.stats.points}</strong></span>`;
+    dom.resultLineup.innerHTML = run.lineup.map((player) => `<article class="run-player-row"><span class="run-slot">${escapeHtml(player.slot)}</span><span class="run-player-copy"><strong>${escapeHtml(player.name)}</strong><small>${escapeHtml(player.nation || "Seleção")} ${escapeHtml(player.year || "")} · ${escapeHtml(player.role_label)}</small></span><span class="run-fit">${fitLabel(player.fitScore)}</span><b>${player.rating || "--"}</b></article>`).join("");
+    dom.resultMatches.innerHTML = run.matches.map((match) => `<article class="run-match-row ${escapeHtml(match.outcome)}"><span><small>${escapeHtml(match.stage)}</small><strong>${escapeHtml(match.opponent)}</strong></span><b>${match.goalsFor} × ${match.goalsAgainst}</b><span class="power-pair"><small>Seu poder ${match.teamPower}</small><small>Rival ${match.opponentPower}</small></span>${match.sevenZero ? '<em class="seven-zero-badge">7 × 0</em>' : ""}</article>`).join("");
+    dom.resultStatistics.innerHTML = `
+      <div class="result-stats expanded">
+        <span><small>Gols pró</small><strong>${run.stats.goalsFor}</strong></span>
+        <span><small>Gols contra</small><strong>${run.stats.goalsAgainst}</strong></span>
+        <span><small>Saldo</small><strong>${run.stats.balance > 0 ? "+" : ""}${run.stats.balance}</strong></span>
+        <span><small>7 × 0</small><strong>${run.sevenZero ? "Encontrado" : "Não"}</strong></span>
+      </div>
+      <p class="run-reason"><strong>Motivo:</strong> ${escapeHtml(run.reason || "Campanha concluída.")}</p>`;
+  }
+
+  function renderRunHistory() {
+    dom.runHistory.innerHTML = state.runHistory.length ? state.runHistory.map((run) => {
+      const date = new Date(run.createdAt);
+      const label = Number.isNaN(date.getTime()) ? "Data indisponível" : date.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+      return `<article class="run-history-row"><span><small>${escapeHtml(label)}</small><strong>${escapeHtml(resultLabel(run))}</strong><em>OVR ${run.stats.overall} · QUI ${run.stats.chemistry} · Encaixe ${run.stats.fit}%</em></span><button type="button" data-run-details="${escapeHtml(run.id)}">Ver detalhes</button></article>`;
+    }).join("") : '<p class="empty-copy">Esta é sua primeira ficha de campanha.</p>';
+  }
+
   function renderResult() {
     const visible = state.phase === "result";
     dom.resultScreen.classList.toggle("hidden", !visible);
     if (!visible) return;
-    dom.resultTitle.textContent = state.result.title;
-    dom.resultReason.textContent = state.result.reason;
-    dom.resultStats.innerHTML = `<span><small>OVR</small><strong>${state.stats.overall}</strong></span><span><small>Química</small><strong>${state.stats.chemistry}</strong></span><span><small>Encaixe</small><strong>${state.stats.fit}%</strong></span><span><small>Pontos</small><strong>${state.campaign.groupTable.points}</strong></span>`;
+    const run = state.selectedReportRun || state.finishedRun;
+    renderRunDetails(run);
+    renderRunHistory();
+    renderResultTabs();
     const unlocked = achievementDefinitions(state).filter(([id]) => state.progress.achievements.includes(id));
     dom.resultAchievements.innerHTML = unlocked.map(([_id, label]) => `<span>★ ${escapeHtml(label)}</span>`).join("");
   }
@@ -709,6 +836,7 @@
         window.setTimeout(reveal, delay);
       } else {
         dispatch({ type: ACTIONS.FINISH_CAMPAIGN });
+        saveFinishedRun(state.finishedRun);
         updateProgress();
         renderGame();
       }
@@ -745,6 +873,17 @@
     dom.cancelMoveBtn.addEventListener("click", () => dispatch({ type: ACTIONS.CANCEL_MOVE }));
     dom.resetBtn.addEventListener("click", () => dispatch({ type: ACTIONS.RESET_RUN }));
     dom.resultResetBtn.addEventListener("click", () => dispatch({ type: ACTIONS.RESET_RUN }));
+    document.querySelectorAll("[data-result-tab]").forEach((button) => button.addEventListener("click", () => {
+      state.activeResultTab = button.dataset.resultTab;
+      renderResultTabs();
+    }));
+    dom.runHistory.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-run-details]");
+      if (!button) return;
+      state.selectedReportRun = state.runHistory.find((run) => run.id === button.dataset.runDetails) || null;
+      state.activeResultTab = "result";
+      renderResult();
+    });
     dom.simulateBtn.addEventListener("click", () => {
       if (dispatch({ type: ACTIONS.START_CAMPAIGN })) revealCampaign();
     });
@@ -754,6 +893,7 @@
   async function init() {
     bindControls();
     state.progress = loadProgress();
+    state.runHistory = loadRunHistory();
     try {
       const database = await loadDatabase();
       dispatch({ type: ACTIONS.BOOT_GAME, database });
