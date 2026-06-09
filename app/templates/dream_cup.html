@@ -30,18 +30,20 @@
     <section class="game-grid" aria-label="Jogo Copa dos Sonhos">
       <article class="draft-board game-panel" aria-label="Sorteio e elenco">
         <div class="panel-head"><div><span class="eyebrow">Draft</span><h2 id="rollTitle">Role o dado</h2></div><span class="skip-counter"><strong id="skipCount">3</strong> pulos</span></div>
-        <div class="dice-stage"><button id="rollBtn" class="dice-button" type="button"><span class="dice-face" aria-hidden="true">⚂</span><strong>Sortear seleção</strong></button><button id="skipBtn" class="icon-button" type="button" disabled aria-label="Pular seleção">↻</button></div>
+        <div class="dice-stage"><button id="rollBtn" class="dice-button" type="button"><span class="dice-face" aria-hidden="true">⚂</span><strong>Sortear seleção</strong></button><button id="skipBtn" class="icon-button" type="button" disabled aria-label="Usar coringa e pular seleção">↻</button></div>
+        <p id="draftStatus" class="draft-status">Role uma seleção para começar.</p>
         <div id="drawCard" class="draw-card empty"><p>Role uma seleção histórica e escolha um jogador para o seu onze.</p></div>
-        <label class="player-search"><span>Elenco sorteado</span><input id="playerSearch" type="search" placeholder="Buscar jogador..." autocomplete="off"></label>
+        <label class="player-search"><span>Deck do sorteio</span><input id="playerSearch" type="search" placeholder="Buscar jogador..." autocomplete="off"></label>
         <div id="playerList" class="player-list" aria-live="polite"></div>
       </article>
       <article class="field-board game-panel" aria-label="Campo central">
         <div class="panel-head field-head"><div><span class="eyebrow">Seu time</span><h2>Onze titular</h2></div><div class="team-stats" aria-label="Status do time"><span id="pickedStat">0/11</span><span id="overallStat">OVR --</span><span id="chemStat">QUI --</span></div></div>
         <div id="lineup" class="lineup pitch" aria-live="polite"></div>
+        <p id="lineupStatus" class="lineup-status">Clique em um jogador no campo para reorganizar.</p>
       </article>
       <aside class="summary-board game-panel" aria-label="Resumo e simulação">
-        <div class="panel-head"><div><span class="eyebrow">Partida</span><h2>Resumo</h2></div></div>
-        <div class="score-grid"><div><small>Status</small><strong id="teamState">Complete o time</strong></div><div><small>Objetivo</small><strong>Vencer por 7 × 0</strong></div></div>
+        <div class="panel-head"><div><span class="eyebrow">Campanha</span><h2>Placar da campanha</h2></div></div>
+        <div class="score-grid"><div><small>Elenco</small><strong id="teamState">Complete o time</strong></div><div><small>Meta</small><strong>Vencer por 7 × 0</strong></div></div>
         <div class="sim-actions"><p id="simulateHint" class="simulate-hint">Complete os 11 para liberar a simulação.</p><button id="simulateBtn" class="primary-btn" type="button" disabled>Faltam 11</button><button id="resetBtn" class="secondary-btn" type="button">Recomeçar</button></div>
         <section id="simulationPanel" class="simulation-panel hidden" aria-live="polite"><div class="panel-head simulation-head"><div><span class="eyebrow">Simulação</span><h2>Campanha</h2></div><button id="quickSimBtn" class="secondary-btn compact-btn" type="button">Auto-sim</button></div><div id="matchTimeline" class="match-timeline"></div><div id="resultCard" class="result-card hidden"></div></section>
       </aside>
