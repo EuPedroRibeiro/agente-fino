@@ -8,46 +8,75 @@
   <link rel="stylesheet" href="/static/css/platform-pixel-global.css">
   <link rel="stylesheet" href="/static/css/dream_cup.css">
 </head>
-<body class="platform-theme dream-cup-page">
+<body class="platform-theme dream-cup-page phase-boot">
   <div class="pixel-sky" aria-hidden="true">
     <span class="cloud cloud-a"></span><span class="cloud cloud-b"></span>
     <span class="coin coin-a"></span><span class="coin coin-b"></span>
   </div>
   <main class="cup-shell">
-    <header class="cup-topbar">
+    <header class="game-hud" aria-label="Painel da Copa dos Sonhos">
       <a class="back-link" href="/agent" aria-label="Voltar para o Agente Fino">←</a>
       <div class="brand-copy"><span class="eyebrow">Agente Fino apresenta</span><h1>Copa dos Sonhos</h1></div>
-      <div class="topbar-actions">
-        <span class="score-mark" aria-label="Objetivo: sete a zero">7 × 0</span>
-        <button id="optionsToggle" class="options-toggle" type="button" aria-expanded="false" aria-controls="optionsPanel">⚙ Opções</button>
+      <div class="hud-stats" aria-label="Status do time">
+        <span><small>Elenco</small><strong id="pickedStat">0/11</strong></span>
+        <span><small>OVR</small><strong id="overallStat">--</strong></span>
+        <span><small>Química</small><strong id="chemStat">--</strong></span>
+        <span><small>Encaixe</small><strong id="fitStat">--</strong></span>
+        <span><small>Coringas</small><strong id="skipCount">3</strong></span>
       </div>
+      <button id="optionsToggle" class="options-toggle" type="button" aria-expanded="false" aria-controls="optionsPanel">⚙</button>
     </header>
+
     <section id="optionsPanel" class="options-panel hidden" aria-label="Opções da partida">
       <div class="control-group"><span class="control-label">Modo</span><button class="pill active" data-mode="classic" type="button">Clássico</button><button class="pill" data-mode="memory" type="button">De memória</button></div>
       <div class="control-group"><span class="control-label">Formação</span><button class="pill active" data-formation="4-3-3" type="button">4-3-3</button><button class="pill" data-formation="4-4-2" type="button">4-4-2</button><button class="pill" data-formation="4-2-3-1" type="button">4-2-3-1</button><button class="pill" data-formation="3-5-2" type="button">3-5-2</button></div>
       <div class="control-group"><span class="control-label">Estilo</span><button class="pill active" data-tactic="balanced" type="button">Equilibrado</button><button class="pill" data-tactic="attack" type="button">Ataque total</button><button class="pill" data-tactic="control" type="button">Controle</button></div>
     </section>
+
     <section class="game-grid" aria-label="Jogo Copa dos Sonhos">
-      <article class="draft-board game-panel" aria-label="Sorteio e elenco">
-        <div class="panel-head"><div><span class="eyebrow">Draft</span><h2 id="rollTitle">Role o dado</h2></div><span class="skip-counter"><strong id="skipCount">3</strong> pulos</span></div>
-        <div class="dice-stage"><button id="rollBtn" class="dice-button" type="button"><span class="dice-face" aria-hidden="true">⚂</span><strong>Sortear seleção</strong></button><button id="skipBtn" class="icon-button" type="button" disabled aria-label="Usar coringa e pular seleção">↻</button></div>
-        <p id="draftStatus" class="draft-status">Role uma seleção para começar.</p>
-        <div id="drawCard" class="draw-card empty"><p>Role uma seleção histórica e escolha um jogador para o seu onze.</p></div>
-        <label class="player-search"><span>Deck do sorteio</span><input id="playerSearch" type="search" placeholder="Buscar jogador..." autocomplete="off"></label>
+      <article id="draftBoard" class="draft-board game-panel" aria-label="Deck e draft">
+        <div class="panel-head"><div><span class="eyebrow">Deck</span><h2 id="rollTitle">Seu próximo elenco</h2></div><span id="draftLockBadge" class="lock-badge">Livre</span></div>
+        <div class="dice-stage"><button id="rollBtn" class="dice-button" type="button"><span class="dice-face" aria-hidden="true">⚂</span><strong>Rolar elenco</strong></button><button id="skipBtn" class="icon-button" type="button" disabled aria-label="Usar coringa e pular seleção">↻</button></div>
+        <p id="draftStatus" class="draft-status">Role uma seleção para começar o draft.</p>
+        <div id="drawCard" class="draw-card empty"><p>Uma seleção histórica vai entrar em campo.</p></div>
+        <label class="player-search"><span>Figurinhas disponíveis</span><input id="playerSearch" type="search" placeholder="Buscar jogador..." autocomplete="off"></label>
         <div id="playerList" class="player-list" aria-live="polite"></div>
       </article>
-      <article class="field-board game-panel" aria-label="Campo central">
-        <div class="panel-head field-head"><div><span class="eyebrow">Seu time</span><h2>Onze titular</h2></div><div class="team-stats" aria-label="Status do time"><span id="pickedStat">0/11</span><span id="overallStat">OVR --</span><span id="chemStat">QUI --</span></div></div>
+
+      <article id="fieldBoard" class="field-board game-panel" aria-label="Campo principal">
+        <div class="panel-head field-head"><div><span class="eyebrow">Formação</span><h2>Onze titular</h2></div><button id="cancelMoveBtn" class="secondary-btn compact-btn hidden" type="button">Cancelar movimento</button></div>
         <div id="lineup" class="lineup pitch" aria-live="polite"></div>
-        <p id="lineupStatus" class="lineup-status">Clique em um jogador no campo para reorganizar.</p>
+        <p id="lineupStatus" class="lineup-status">Monte o time e ajuste cada jogador na melhor posição.</p>
       </article>
-      <aside class="summary-board game-panel" aria-label="Resumo e simulação">
-        <div class="panel-head"><div><span class="eyebrow">Campanha</span><h2>Placar da campanha</h2></div></div>
-        <div class="score-grid"><div><small>Elenco</small><strong id="teamState">Complete o time</strong></div><div><small>Meta</small><strong>Vencer por 7 × 0</strong></div></div>
-        <div class="sim-actions"><p id="simulateHint" class="simulate-hint">Complete os 11 para liberar a simulação.</p><button id="simulateBtn" class="primary-btn" type="button" disabled>Faltam 11</button><button id="resetBtn" class="secondary-btn" type="button">Recomeçar</button></div>
-        <section id="simulationPanel" class="simulation-panel hidden" aria-live="polite"><div class="panel-head simulation-head"><div><span class="eyebrow">Simulação</span><h2>Campanha</h2></div><button id="quickSimBtn" class="secondary-btn compact-btn" type="button">Auto-sim</button></div><div id="matchTimeline" class="match-timeline"></div><div id="resultCard" class="result-card hidden"></div></section>
+
+      <aside id="campaignBoard" class="campaign-board game-panel" aria-label="Campanha e placar">
+        <div class="panel-head"><div><span class="eyebrow">Campanha</span><h2 id="campaignTitle">Rumo à final</h2></div><span id="campaignPhase" class="phase-badge">Draft</span></div>
+        <div id="groupTable" class="group-table">
+          <span><small>Pts</small><strong id="groupPoints">0</strong></span>
+          <span><small>Saldo</small><strong id="groupBalance">0</strong></span>
+          <span><small>Jogos</small><strong id="groupGames">0/3</strong></span>
+        </div>
+        <div class="sim-actions"><p id="simulateHint" class="simulate-hint">Complete o onze para começar a campanha.</p><button id="simulateBtn" class="primary-btn" type="button" disabled>Faltam 11</button><button id="resetBtn" class="secondary-btn" type="button">Nova run</button></div>
+        <section id="simulationPanel" class="simulation-panel" aria-live="polite">
+          <div id="matchTimeline" class="match-timeline"><p class="empty-copy">Os placares aparecerão aqui.</p></div>
+        </section>
+        <section class="progress-panel" aria-label="Progressão local">
+          <div class="progress-head"><strong>Carreira local</strong><span id="progressRuns">0 runs</span></div>
+          <div id="achievementList" class="achievement-list"></div>
+        </section>
       </aside>
     </section>
+
+    <section id="resultScreen" class="result-screen hidden" aria-live="polite">
+      <div class="result-trophy" aria-hidden="true">◆</div>
+      <span class="eyebrow">Fim da campanha</span>
+      <h2 id="resultTitle">Resultado</h2>
+      <p id="resultReason"></p>
+      <div id="resultStats" class="result-stats"></div>
+      <div id="resultAchievements" class="result-achievements"></div>
+      <button id="resultResetBtn" class="primary-btn" type="button">Jogar outra run</button>
+    </section>
+
     <footer class="data-credit"><span id="dbSource">Banco local da Copa dos Sonhos</span><span>Elencos reais; ratings e características são derivados pelo jogo.</span></footer>
   </main>
   <script src="/static/js/dream_cup.js" defer></script>
