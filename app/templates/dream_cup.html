@@ -8,28 +8,46 @@
   <link rel="stylesheet" href="/static/css/platform-pixel-global.css">
   <link rel="stylesheet" href="/static/css/dream_cup.css">
 </head>
-<body class="platform-theme dream-cup-page dream-cup-v3">
-  <div class="pixel-sky" aria-hidden="true"><span class="cloud cloud-a"></span><span class="cloud cloud-b"></span><span class="coin coin-a"></span><span class="coin coin-b"></span><span class="pipe pipe-a"></span></div>
-  <main class="cup-shell cup-shell-v3">
-    <header class="cup-hero cup-hero-v3">
-      <a class="back-link" href="/agent" aria-label="Voltar para o Agente Fino">← Agente Fino</a>
-      <div class="hero-copy"><p class="eyebrow">Agente Fino apresenta</p><h1>Copa dos Sonhos</h1><p class="subtitle">Role uma seleção e uma Copa, escolha um jogador real daquele elenco, complete os 11 e tente encontrar o 7 a 0.</p></div>
-      <div class="score-mark" aria-hidden="true"><span>7</span><small>x</small><span>0</span></div>
+<body class="platform-theme dream-cup-page">
+  <div class="pixel-sky" aria-hidden="true">
+    <span class="cloud cloud-a"></span><span class="cloud cloud-b"></span>
+    <span class="coin coin-a"></span><span class="coin coin-b"></span>
+  </div>
+  <main class="cup-shell">
+    <header class="cup-topbar">
+      <a class="back-link" href="/agent" aria-label="Voltar para o Agente Fino">←</a>
+      <div class="brand-copy"><span class="eyebrow">Agente Fino apresenta</span><h1>Copa dos Sonhos</h1></div>
+      <div class="topbar-actions">
+        <span class="score-mark" aria-label="Objetivo: sete a zero">7 × 0</span>
+        <button id="optionsToggle" class="options-toggle" type="button" aria-expanded="false" aria-controls="optionsPanel">⚙ Opções</button>
+      </div>
     </header>
-    <section class="database-strip database-strip-v3 panel-card" aria-label="Status do banco de dados">
-      <div><span id="dbTeams">--</span><small>seleções</small></div><div><span id="dbSquads">--</span><small>elencos</small></div><div><span id="dbPlayers">--</span><small>jogadores</small></div><div class="db-source"><strong id="dbSource">Carregando banco...</strong><small>Elencos reais. Ratings e traits são calculados pelo jogo.</small></div>
-    </section>
-    <section class="control-deck control-deck-v3" aria-label="Configurações da partida">
+    <section id="optionsPanel" class="options-panel hidden" aria-label="Opções da partida">
       <div class="control-group"><span class="control-label">Modo</span><button class="pill active" data-mode="classic" type="button">Clássico</button><button class="pill" data-mode="memory" type="button">De memória</button></div>
-      <div class="control-group formation-group"><span class="control-label">Formação</span><button class="pill active" data-formation="4-3-3" type="button">4-3-3</button><button class="pill" data-formation="4-4-2" type="button">4-4-2</button><button class="pill" data-formation="4-2-3-1" type="button">4-2-3-1</button><button class="pill" data-formation="3-5-2" type="button">3-5-2</button></div>
-      <div class="control-group tactic-group"><span class="control-label">Estilo</span><button class="pill active" data-tactic="balanced" type="button">Equilibrado</button><button class="pill" data-tactic="attack" type="button">Ataque total</button><button class="pill" data-tactic="control" type="button">Controle</button></div>
+      <div class="control-group"><span class="control-label">Formação</span><button class="pill active" data-formation="4-3-3" type="button">4-3-3</button><button class="pill" data-formation="4-4-2" type="button">4-4-2</button><button class="pill" data-formation="4-2-3-1" type="button">4-2-3-1</button><button class="pill" data-formation="3-5-2" type="button">3-5-2</button></div>
+      <div class="control-group"><span class="control-label">Estilo</span><button class="pill active" data-tactic="balanced" type="button">Equilibrado</button><button class="pill" data-tactic="attack" type="button">Ataque total</button><button class="pill" data-tactic="control" type="button">Controle</button></div>
     </section>
-    <section class="flow-steps" aria-label="Fluxo do jogo"><div class="flow-step active"><strong>01</strong><span>Role</span><small>Sorteie seleção + Copa</small></div><div class="flow-step"><strong>02</strong><span>Escolha</span><small>Pegue um jogador real</small></div><div class="flow-step"><strong>03</strong><span>Monte</span><small>Feche o onze titular</small></div><div class="flow-step"><strong>04</strong><span>Simule</span><small>Busque o 7 a 0</small></div></section>
-    <section class="game-grid game-grid-v3">
-      <article class="draft-board panel-card flow-card" aria-label="Sorteio e elenco"><div class="panel-head compact-head"><div><p class="eyebrow">Draft real de Copas</p><h2 id="rollTitle">Role o dado</h2></div><div class="skip-counter"><span id="skipCount">3</span> coringas</div></div><div class="dice-stage dice-stage-v3"><button id="rollBtn" class="dice-button" type="button" aria-label="Sortear seleção e Copa"><span class="dice-face">⚂</span><strong>Rolar seleção</strong></button><button id="skipBtn" class="secondary-btn" type="button" disabled>Pular</button></div><div id="drawCard" class="draw-card empty"><p>Uma seleção histórica vai aparecer aqui. Escolha um jogador compatível com as vagas abertas.</p></div><label class="player-search player-search-v3"><span>Elenco sorteado</span><input id="playerSearch" type="search" placeholder="Buscar nome, camisa ou posição..." autocomplete="off"></label><div id="playerList" class="player-list player-list-v3" aria-live="polite"></div></article>
-      <article class="squad-board panel-card field-card" aria-label="Campo e onze titular"><div class="panel-head compact-head"><div><p class="eyebrow">Seu time</p><h2>Onze titular</h2></div><div class="team-stats"><span id="pickedStat">0/11</span><span id="overallStat">OVR --</span><span id="chemStat">QUI --</span></div></div><div id="lineup" class="lineup pitch pitch-v3" aria-live="polite"></div></article>
-      <aside class="summary-board panel-card" aria-label="Resumo e simulação"><div class="panel-head compact-head"><div><p class="eyebrow">Box score</p><h2>Resumo</h2></div></div><div class="score-grid"><div><small>Status</small><strong id="teamState">Complete o time</strong></div><div><small>Meta</small><strong>Vencer por 7 x 0</strong></div><div><small>Banco</small><strong>Copas reais</strong></div></div><div class="sim-actions"><p id="simulateHint" class="simulate-hint">Complete os 11 para liberar a simulação.</p><button id="simulateBtn" class="primary-btn" type="button" disabled>Faltam 11</button><button id="resetBtn" class="secondary-btn" type="button">Recomeçar</button></div><section id="simulationPanel" class="simulation-panel hidden" aria-live="polite"><div class="panel-head compact-head simulation-head"><div><p class="eyebrow">Simulação</p><h2>Campanha</h2></div><button id="quickSimBtn" class="secondary-btn compact-btn" type="button">Auto-sim</button></div><div id="matchTimeline" class="match-timeline"></div><div id="resultCard" class="result-card hidden"></div></section></aside>
+    <section class="game-grid" aria-label="Jogo Copa dos Sonhos">
+      <article class="draft-board game-panel" aria-label="Sorteio e elenco">
+        <div class="panel-head"><div><span class="eyebrow">Draft</span><h2 id="rollTitle">Role o dado</h2></div><span class="skip-counter"><strong id="skipCount">3</strong> pulos</span></div>
+        <div class="dice-stage"><button id="rollBtn" class="dice-button" type="button"><span class="dice-face" aria-hidden="true">⚂</span><strong>Sortear seleção</strong></button><button id="skipBtn" class="icon-button" type="button" disabled aria-label="Pular seleção">↻</button></div>
+        <div id="drawCard" class="draw-card empty"><p>Role uma seleção histórica e escolha um jogador para o seu onze.</p></div>
+        <label class="player-search"><span>Elenco sorteado</span><input id="playerSearch" type="search" placeholder="Buscar jogador..." autocomplete="off"></label>
+        <div id="playerList" class="player-list" aria-live="polite"></div>
+      </article>
+      <article class="field-board game-panel" aria-label="Campo central">
+        <div class="panel-head field-head"><div><span class="eyebrow">Seu time</span><h2>Onze titular</h2></div><div class="team-stats" aria-label="Status do time"><span id="pickedStat">0/11</span><span id="overallStat">OVR --</span><span id="chemStat">QUI --</span></div></div>
+        <div id="lineup" class="lineup pitch" aria-live="polite"></div>
+      </article>
+      <aside class="summary-board game-panel" aria-label="Resumo e simulação">
+        <div class="panel-head"><div><span class="eyebrow">Partida</span><h2>Resumo</h2></div></div>
+        <div class="score-grid"><div><small>Status</small><strong id="teamState">Complete o time</strong></div><div><small>Objetivo</small><strong>Vencer por 7 × 0</strong></div></div>
+        <div class="sim-actions"><p id="simulateHint" class="simulate-hint">Complete os 11 para liberar a simulação.</p><button id="simulateBtn" class="primary-btn" type="button" disabled>Faltam 11</button><button id="resetBtn" class="secondary-btn" type="button">Recomeçar</button></div>
+        <section id="simulationPanel" class="simulation-panel hidden" aria-live="polite"><div class="panel-head simulation-head"><div><span class="eyebrow">Simulação</span><h2>Campanha</h2></div><button id="quickSimBtn" class="secondary-btn compact-btn" type="button">Auto-sim</button></div><div id="matchTimeline" class="match-timeline"></div><div id="resultCard" class="result-card hidden"></div></section>
+      </aside>
     </section>
-    <footer class="data-credit">Dados de elenco: Fjelstul World Cup Database / DataHub. Ratings e traits são derivados pelo jogo para balanceamento.</footer>
-  </main><script src="/static/js/dream_cup.js" defer></script>
-</body></html>
+    <footer class="data-credit"><span id="dbSource">Banco local da Copa dos Sonhos</span><span>Elencos reais; ratings e características são derivados pelo jogo.</span></footer>
+  </main>
+  <script src="/static/js/dream_cup.js" defer></script>
+</body>
+</html>

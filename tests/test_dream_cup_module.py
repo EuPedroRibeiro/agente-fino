@@ -35,6 +35,7 @@ class DreamCupModuleTests(TestCase):
         player = squad["players"][0]
         self.assertIn("name", player)
         self.assertIn("role", player)
+        self.assertIn("role_label", player)
         self.assertIn("rating", player)
 
         generated_path = ROOT / "app" / "static" / "data" / "dream_cup_database.json"
@@ -45,6 +46,7 @@ class DreamCupModuleTests(TestCase):
         self.assertGreaterEqual(generated["stats"].get("squads", 0), 100)
         player_count = generated["stats"].get("players") or generated["stats"].get("unique_players", 0)
         self.assertGreaterEqual(player_count, 1000)
+        self.assertGreaterEqual(generated["stats"].get("squads", 0), 100)
 
     def test_dream_cup_js_loads_database_then_seed(self):
         js = (ROOT / "app" / "static" / "js" / "dream_cup.js").read_text(encoding="utf-8")
@@ -54,18 +56,52 @@ class DreamCupModuleTests(TestCase):
         self.assertIn("playerSearch", js)
 
 
-    def test_dream_cup_v3_layout_has_clear_three_zone_flow(self):
+    def test_dream_cup_layout_is_compact_and_game_focused(self):
         html = (ROOT / "app" / "templates" / "dream_cup.html").read_text(encoding="utf-8")
         css = (ROOT / "app" / "static" / "css" / "dream_cup.css").read_text(encoding="utf-8")
         js = (ROOT / "app" / "static" / "js" / "dream_cup.js").read_text(encoding="utf-8")
-        self.assertIn("dream-cup-v3", html)
-        self.assertIn("flow-steps", html)
+        self.assertIn("optionsToggle", html)
+        self.assertIn("⚙ Opções", html)
+        self.assertIn("draft-board", html)
+        self.assertIn("field-board", html)
         self.assertIn("summary-board", html)
         self.assertIn("pickedStat", html)
         self.assertIn("teamState", html)
-        self.assertIn("Copa dos Sonhos v3", css)
-        self.assertIn("choose-badge", css)
+        self.assertNotIn("database-strip", html)
+        self.assertNotIn("flow-steps", html)
+        self.assertIn(".game-grid", css)
+        self.assertIn(".options-panel", css)
         self.assertIn("pickedStat", js)
+
+    def test_player_names_and_display_labels_are_clean_and_translated(self):
+        for file_name in ("dream_cup_database.json", "dream_cup_seed.json"):
+            path = ROOT / "app" / "static" / "data" / file_name
+            text = path.read_text(encoding="utf-8")
+            data = json.loads(text)
+            self.assertNotIn("not applicable", text.lower())
+            for squad in data["squads"]:
+                if squad.get("nation_original") == "Brazil":
+                    self.assertEqual(squad["nation"], "Brasil")
+                for player in squad["players"]:
+                    self.assertTrue(player["name"].strip())
+                    self.assertNotIn("  ", player["name"])
+                    self.assertNotIn("not applicable", player["name"].lower())
+                    self.assertIn(player["role"], {"GK", "DF", "MF", "FW"})
+                    self.assertEqual(
+                        player["role_label"],
+                        {"GK": "Goleiro", "DF": "Defensor", "MF": "Meio-campista", "FW": "Atacante"}[player["role"]],
+                    )
+                    self.assertTrue(player.get("trait_label"))
+
+    def test_frontend_has_portuguese_player_labels_and_no_bad_name_placeholder(self):
+        html = (ROOT / "app" / "templates" / "dream_cup.html").read_text(encoding="utf-8")
+        js = (ROOT / "app" / "static" / "js" / "dream_cup.js").read_text(encoding="utf-8")
+        combined = f"{html}\n{js}".lower()
+        self.assertNotIn("not applicable", combined)
+        self.assertIn('df: "defensor"', js.lower())
+        self.assertIn('mf: "meio-campista"', js.lower())
+        self.assertIn('fw: "atacante"', js.lower())
+        self.assertIn('gk: "goleiro"', js.lower())
     def test_no_external_assets_or_official_images(self):
         html = (ROOT / "app" / "templates" / "dream_cup.html").read_text(encoding="utf-8")
         css = (ROOT / "app" / "static" / "css" / "dream_cup.css").read_text(encoding="utf-8")

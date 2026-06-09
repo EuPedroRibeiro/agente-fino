@@ -17,10 +17,26 @@
 
   const roleLabel = (role) => ({
     GK: "Goleiro",
-    DF: "Defesa",
-    MF: "Meio",
-    FW: "Ataque",
+    DF: "Defensor",
+    MF: "Meio-campista",
+    FW: "Atacante",
   }[role] || "Jogador");
+
+  const nationLabels = {
+    Brazil: "Brasil", Germany: "Alemanha", "West Germany": "Alemanha Ocidental",
+    France: "França", Spain: "Espanha", Italy: "Itália", England: "Inglaterra",
+    Netherlands: "Holanda", "Saudi Arabia": "Arábia Saudita", "United States": "Estados Unidos",
+    "South Korea": "Coreia do Sul", Japan: "Japão", Mexico: "México", Croatia: "Croácia",
+    Belgium: "Bélgica", Morocco: "Marrocos", Cameroon: "Camarões", "Ivory Coast": "Costa do Marfim",
+    Nigeria: "Nigéria", Serbia: "Sérvia", Switzerland: "Suíça", Poland: "Polônia",
+    Sweden: "Suécia", Russia: "Rússia", "Soviet Union": "União Soviética",
+    "Czech Republic": "República Tcheca", Czechoslovakia: "Tchecoslováquia", Yugoslavia: "Iugoslávia",
+    Ecuador: "Equador", Colombia: "Colômbia", Wales: "País de Gales", Scotland: "Escócia",
+    "Northern Ireland": "Irlanda do Norte", "Republic of Ireland": "Irlanda", Australia: "Austrália",
+    "New Zealand": "Nova Zelândia", Iran: "Irã", Tunisia: "Tunísia", Algeria: "Argélia",
+    Egypt: "Egito", Turkey: "Turquia", Greece: "Grécia", Norway: "Noruega", Austria: "Áustria",
+    Romania: "Romênia", Bulgaria: "Bulgária",
+  };
 
   const state = {
     database: null,
@@ -53,10 +69,9 @@
   const resultCard = el("resultCard");
   const quickSimBtn = el("quickSimBtn");
   const playerSearch = el("playerSearch");
-  const dbTeams = el("dbTeams");
-  const dbSquads = el("dbSquads");
-  const dbPlayers = el("dbPlayers");
   const dbSource = el("dbSource");
+  const optionsToggle = el("optionsToggle");
+  const optionsPanel = el("optionsPanel");
   const pickedStat = el("pickedStat");
   const teamState = el("teamState");
   const simulateHint = el("simulateHint");
@@ -83,11 +98,7 @@
   }
 
   function renderDatabaseStats() {
-    const stats = state.database.stats || {};
-    dbTeams.textContent = formatNumber(stats.teams || new Set(state.squads.map(s => s.nation)).size);
-    dbSquads.textContent = formatNumber(stats.squads || state.squads.length);
-    dbPlayers.textContent = formatNumber(stats.unique_players || new Set(state.squads.flatMap(s => s.players.map(p => p.id || p.name))).size);
-    dbSource.textContent = state.database.source || "Banco local da Copa dos Sonhos";
+    if (dbSource) dbSource.textContent = state.database.source || "Banco local da Copa dos Sonhos";
   }
 
   function flattenFormation() {
@@ -126,10 +137,10 @@
         pos.textContent = slot.pos;
         const name = document.createElement("div");
         name.className = "slot-name";
-        name.textContent = slot.player ? displayName(slot.player) : "Vaga aberta";
+        name.textContent = slot.player ? displayName(slot.player) : roleLabel(roleBySlot(slot.pos));
         const meta = document.createElement("div");
         meta.className = "slot-meta";
-        meta.textContent = slot.player ? playerMeta(slot.player) : roleLabel(roleBySlot(slot.pos));
+        meta.textContent = slot.player ? playerMeta(slot.player) : "";
         node.append(pos, name, meta);
         if (slot.player) {
           const rating = document.createElement("span");
@@ -145,13 +156,16 @@
   }
 
   function displayName(player) {
-    if (state.mode !== "memory") return player.name;
+    const cleanName = String(player.name || "").replace(/\s+/g, " ").trim() || "Jogador sem nome";
+    if (state.mode !== "memory") return cleanName;
     return `${player.role} ${player.shirt_number ? "#" + player.shirt_number : "?"}`;
   }
 
   function playerMeta(player) {
     const shirt = player.shirt_number ? `#${player.shirt_number} · ` : "";
-    return `${shirt}${player.nation} ${player.year} · ${player.trait || roleLabel(player.role)}`;
+    const nation = player.nation || nationLabels[player.nation_original] || player.nation_original || "Seleção";
+    const trait = player.trait_label || player.trait || roleLabel(player.role);
+    return `${shirt}${nationLabels[nation] || nation} ${player.year} · ${trait}`;
   }
 
   function calculateChemistry() {
@@ -190,7 +204,7 @@
     if (chemStat) chemStat.textContent = `QUI ${chem || "--"}`;
     if (pickedStat) pickedStat.textContent = `${pickedCount}/${totalSlots}`;
     if (teamState) teamState.textContent = complete ? "Time pronto" : `Faltam ${missing} vaga${missing === 1 ? "" : "s"}`;
-    if (simulateHint) simulateHint.textContent = complete ? "Onze fechado. Simule a campanha e veja se o 7 a 0 aparece." : "Complete os 11 para liberar a simula????o.";
+    if (simulateHint) simulateHint.textContent = complete ? "Onze fechado. Simule a campanha e veja se o 7 a 0 aparece." : "Complete os 11 para liberar a simulação.";
     if (simulateBtn) { simulateBtn.disabled = !complete; simulateBtn.textContent = complete ? "Simular Copa" : `Faltam ${missing}`; }
   }
 
@@ -256,7 +270,7 @@
           <span class="player-name">${escapeHtml(displayName(player))}</span>
           <span class="player-meta">${escapeHtml(playerMeta(player))}</span>
         </span>
-        <span class="player-role">${state.mode === "memory" ? "?" : (player.rating || "--")} · ${player.role}</span>
+        <span class="player-role">${state.mode === "memory" ? "?" : (player.rating || "--")} · ${escapeHtml(player.role_label || roleLabel(player.role))}</span>
       `;
       button.addEventListener("click", () => selectPlayer(player));
       playerList.appendChild(button);
@@ -450,6 +464,12 @@
   }
 
   function bindControls() {
+    optionsToggle?.addEventListener("click", () => {
+      const willOpen = optionsPanel.classList.contains("hidden");
+      optionsPanel.classList.toggle("hidden", !willOpen);
+      optionsToggle.setAttribute("aria-expanded", String(willOpen));
+    });
+
     document.querySelectorAll("[data-formation]").forEach(btn => {
       btn.addEventListener("click", () => {
         document.querySelectorAll("[data-formation]").forEach(b => b.classList.remove("active"));
