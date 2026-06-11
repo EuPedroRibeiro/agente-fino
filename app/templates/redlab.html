@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fino RedLab - Private Arena</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
+    <link rel="shortcut icon" href="/static/favicon.ico" />
+    <link rel="stylesheet" href="/static/css/redlab.css?v=private-arena-1" />
+  </head>
+  <body class="redlab-page">
+    <div class="ambient-cabin" aria-hidden="true">
+      <span class="ambient-line ambient-line-left"></span>
+      <span class="ambient-line ambient-line-right"></span>
+      <span class="ambient-glow"></span>
+    </div>
+
+    <main class="redlab-shell">
+      <header class="redlab-topbar">
+        <a class="redlab-brand" href="/agent">
+          <span class="brand-emblem"><img src="/static/brand/agente-fino-symbol-reduced.png" alt="" /></span>
+          <span class="brand-copy"><small>Agente Fino</small><strong>RedLab Private Arena</strong></span>
+        </a>
+        <div class="redlab-rank" aria-label="Progresso na Arena">
+          <span id="rankName">Recruta</span>
+          <div class="xp-track"><span id="xpFill"></span></div>
+          <b id="xpTotal">0 XP</b>
+        </div>
+        <a class="ghost-link" href="/agent">Voltar ao Agente</a>
+      </header>
+
+      <section class="redlab-hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Private Security Suite</p>
+          <h1>Precisao em ambiente controlado.</h1>
+          <p>Laboratorios isolados, evidencias reproduziveis, patches defensivos e relatorios de campanha em uma Arena privada.</p>
+        </div>
+        <div class="mode-switch" role="tablist" aria-label="Modo da Arena">
+          <button class="active" data-mode-tab="sandbox" type="button">Sandbox Labs</button>
+          <button data-mode-tab="target" type="button">Target Mode</button>
+        </div>
+      </section>
+
+      <section id="sandboxPanel" class="arena-grid">
+        <aside class="redlab-panel lab-sidebar">
+          <header><div><p class="eyebrow">Mission Library</p><h2>Laboratorios</h2></div><span class="panel-code">01</span></header>
+          <div id="labList" class="lab-list"><p class="muted">Carregando...</p></div>
+        </aside>
+
+        <section class="redlab-panel mission-panel">
+          <div id="missionEmpty" class="mission-empty">
+            <span class="arena-mark" aria-hidden="true">RL</span>
+            <p class="eyebrow">Awaiting selection</p>
+            <h2>Escolha um laboratorio</h2>
+            <p>Cada missao acontece dentro da engine simulada e termina com um patch defensivo verificavel.</p>
+          </div>
+          <div id="missionContent" hidden>
+            <header class="mission-head">
+              <div><p id="missionCategory" class="eyebrow">Categoria</p><h2 id="missionTitle">Laboratorio</h2></div>
+              <span id="missionDifficulty" class="difficulty">easy</span>
+            </header>
+            <p id="missionDescription" class="mission-description"></p>
+            <div class="mission-columns">
+              <div><h3>Objetivos</h3><ul id="missionObjectives"></ul></div>
+              <div><h3>Intelligence Notes</h3><ul id="missionHints"></ul></div>
+            </div>
+            <label class="payload-field">
+              Entrada do laboratorio
+              <textarea id="payloadInput" rows="4" placeholder="Digite um teste para a missao selecionada..."></textarea>
+            </label>
+            <div class="mission-actions">
+              <button id="startLabBtn" class="primary-action" type="button">Iniciar missao</button>
+              <button id="validateLabBtn" type="button" disabled>Validar teste</button>
+              <button id="patchLabBtn" type="button" disabled>Aplicar patch</button>
+              <button id="reportLabBtn" type="button" disabled>Relatorio</button>
+            </div>
+          </div>
+        </section>
+
+        <aside class="redlab-panel console-panel">
+          <header><div><p class="eyebrow">Live Telemetry</p><h2>Console da run</h2></div><span class="live-indicator">live</span></header>
+          <div id="arenaConsole" class="arena-console" aria-live="polite"><p>[SISTEMA] Arena pronta.</p></div>
+          <section class="evidence-card">
+            <span>Evidencia atual</span>
+            <p id="evidenceText">Nenhuma evidencia coletada.</p>
+          </section>
+        </aside>
+      </section>
+
+      <section id="targetPanel" class="target-panel redlab-panel" hidden>
+        <header>
+          <div><p class="eyebrow">Target Mode</p><h2>Preflight controlado por allowlist</h2></div>
+          <span id="targetStatus" class="status-chip">carregando</span>
+        </header>
+        <p>Prepare uma revisao passiva das categorias solicitadas. O servidor nao dispara exploits nem payloads contra o alvo.</p>
+        <label>URL allowlisted<input id="targetUrl" type="url" placeholder="https://ambiente-autorizado.example" /></label>
+        <div id="techniqueList" class="technique-list"></div>
+        <label class="authorization-check"><input id="targetConfirmed" type="checkbox" /><span>Confirmo que o host esta autorizado e incluido na allowlist do servidor.</span></label>
+        <button id="targetScanBtn" class="primary-action" type="button">Preparar preflight</button>
+        <div id="targetResults" class="target-results"></div>
+      </section>
+
+      <section class="redlab-panel history-panel">
+        <header><div><p class="eyebrow">Private Archive</p><h2>Runs recentes</h2></div><button id="refreshHistoryBtn" type="button">Atualizar</button></header>
+        <div id="runHistory" class="run-history"></div>
+      </section>
+    </main>
+    <script src="/static/js/redlab.js?v=private-arena-1"></script>
+  </body>
+</html>

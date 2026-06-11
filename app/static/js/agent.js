@@ -9,6 +9,7 @@ const ui = {
   deepResearchBtn: document.querySelector("#deepResearchBtn"),
   darkforestBtn: document.querySelector("#darkforestBtn"),
   sherlockBtn: document.querySelector("#sherlockBtn"),
+  redlabBtn: document.querySelector("#redlabBtn"),
   securityShortcutBtn: document.querySelector("#securityShortcutBtn"),
   mcpBrasilBtn: document.querySelector("#mcpBrasilBtn"),
   retestGeminiBtn: document.querySelector("#retestGeminiBtn"),
@@ -39,6 +40,7 @@ const ui = {
   sherlockCpfLabStatus: document.querySelector("#sherlockCpfLabStatus"),
   sherlockCnpjStatus: document.querySelector("#sherlockCnpjStatus"),
   sherlockCacheStatus: document.querySelector("#sherlockCacheStatus"),
+  redlabStatus: document.querySelector("#redlabStatus"),
   mcpBrasilStatus: document.querySelector("#mcpBrasilStatus"),
   providerNarrative: document.querySelector("#providerNarrative"),
   catalogBox: document.querySelector("#catalogBox"),
@@ -560,13 +562,14 @@ async function confirmAction(actionId) {
 }
 
 async function loadStatus() {
-  const [agentStatus, providerStatus, securityStatus, publicDataStatus, sherlockStatus, mcpBrasilStatus] = await Promise.allSettled([
+  const [agentStatus, providerStatus, securityStatus, publicDataStatus, sherlockStatus, mcpBrasilStatus, redlabStatus] = await Promise.allSettled([
     fetch("/api/agent/status").then((response) => response.json()),
     fetch("/api/agent/providers/status").then((response) => response.json()),
     fetch("/api/security/status").then((response) => response.json()),
     fetch("/api/public-data/status").then((response) => response.json()),
     fetch("/api/sherlock/status").then((response) => response.json()),
     fetch("/api/mcp-brasil/status").then((response) => response.json()),
+    fetch("/api/redlab/status").then((response) => response.json()),
   ]);
   if (providerStatus.status === "fulfilled") {
     updateProviderBadges(providerStatus.value);
@@ -596,6 +599,9 @@ async function loadStatus() {
     if (ui.sherlockCpfLabStatus) ui.sherlockCpfLabStatus.textContent = sherlock.cpf_lab || "--";
     if (ui.sherlockCnpjStatus) ui.sherlockCnpjStatus.textContent = sherlock.cnpj_provider || "--";
     if (ui.sherlockCacheStatus) ui.sherlockCacheStatus.textContent = sherlock.redis_cache || sherlock.cache_backend || "--";
+  }
+  if (redlabStatus.status === "fulfilled" && ui.redlabStatus) {
+    ui.redlabStatus.textContent = redlabStatus.value.active ? `${redlabStatus.value.labs} labs` : "inativo";
   }
   if (mcpBrasilStatus.status === "fulfilled" && ui.mcpBrasilStatus) {
     const mcp = mcpBrasilStatus.value;
@@ -883,6 +889,9 @@ on(ui.darkforestBtn, "click", () => {
 });
 on(ui.sherlockBtn, "click", () => {
   window.location.href = "/sherlock";
+});
+on(ui.redlabBtn, "click", () => {
+  window.location.href = "/redlab";
 });
 on(ui.securityShortcutBtn, "click", () => {
   window.location.href = "/security";

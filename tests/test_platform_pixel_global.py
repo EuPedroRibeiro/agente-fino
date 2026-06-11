@@ -17,11 +17,14 @@ class PlatformPixelGlobalTests(unittest.TestCase):
     def test_global_theme_is_loaded_by_product_pages(self) -> None:
         href = "/static/css/themes/platform-pixel-global.css"
         self.assertTrue(self.css_path.exists())
-        for name, html in self.templates.items():
+        for name in ("login", "sherlock"):
+            html = self.templates[name]
             with self.subTest(template=name):
                 self.assertIn(href, html)
                 self.assertIn('class="pixel-world-layer"', html)
                 self.assertIn('aria-hidden="true"', html)
+        self.assertNotIn(href, self.templates["agent"])
+        self.assertNotIn('class="pixel-world-layer"', self.templates["agent"])
 
     def test_old_agent_background_is_removed(self) -> None:
         self.assertFalse(Path("app/static/css/themes/agent-retro-bg.css").exists())

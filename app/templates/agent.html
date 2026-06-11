@@ -7,8 +7,7 @@
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
     <link rel="shortcut icon" href="/static/favicon.ico" />
     <link rel="apple-touch-icon" href="/static/apple-touch-icon.png" />
-    <link rel="stylesheet" href="/static/css/agent.css" />
-    <link rel="stylesheet" href="/static/css/themes/platform-pixel-global.css" />
+    <link rel="stylesheet" href="/static/css/agent.css?v=redlab-private-arena-1" />
     <script>
       const agenteFinoAuthenticated =
         localStorage.getItem("agente_fino_authenticated") === "true" ||
@@ -19,15 +18,6 @@
     </script>
   </head>
   <body class="agent-page empty-state-active">
-    <div class="pixel-world-layer" aria-hidden="true">
-      <span class="pixel-cloud pixel-cloud-a"></span>
-      <span class="pixel-cloud pixel-cloud-b"></span>
-      <span class="pixel-coin pixel-coin-a"></span>
-      <span class="pixel-coin pixel-coin-b"></span>
-      <span class="pixel-blocks pixel-blocks-a"></span>
-      <span class="pixel-platform pixel-platform-a"></span>
-      <span class="pixel-ground"></span>
-    </div>
     <main class="app-shell">
       <aside class="conversation-sidebar" aria-label="Conversas">
         <div class="sidebar-brand">
@@ -48,8 +38,12 @@
           Segurança
         </button>
         <a id="dreamCupShortcut" class="sidebar-action-button dream-cup-shortcut" href="/agent/copa-dos-sonhos">
-          <span aria-hidden="true">âš½</span>
+          <span aria-hidden="true">DC</span>
           Copa dos Sonhos
+        </a>
+        <a id="redlabShortcut" class="sidebar-action-button" href="/redlab">
+          <span aria-hidden="true">RL</span>
+          Fino RedLab
         </a>
         <div class="sidebar-section">
           <label class="search-label" for="conversationSearch">Conversas</label>
@@ -90,6 +84,7 @@
               <button type="button" data-prompt="Pesquisar algo">Pesquisar algo</button>
               <button type="button" data-prompt="Organizar uma ideia">Organizar uma ideia</button>
               <a class="dream-cup-chip" href="/agent/copa-dos-sonhos">Jogar Copa dos Sonhos</a>
+              <a class="redlab-chip" href="/redlab">Abrir Fino RedLab</a>
             </div>
           </div>
           <div id="chatHistory" class="chat-history" aria-live="polite"></div>
@@ -142,6 +137,7 @@
           <div><span>CNPJ provider</span><strong id="sherlockCnpjStatus">--</strong></div>
           <div><span>Redis cache</span><strong id="sherlockCacheStatus">--</strong></div>
           <div><span>MCP Brasil</span><strong id="mcpBrasilStatus">--</strong></div>
+          <div><span>Fino RedLab</span><strong id="redlabStatus">--</strong></div>
         </section>
 
         <section class="detail-block">
@@ -161,6 +157,7 @@
           <button id="darkforestBtn" type="button">Scanner de chaves</button>
           <button id="sherlockBtn" type="button">Sherlock Consultas</button>
           <button id="mcpBrasilBtn" type="button">MCP Brasil</button>
+          <button id="redlabBtn" type="button">Fino RedLab</button>
           <button id="matrixBtn" type="button">Matriz IA</button>
           <button id="toolsBtn" type="button" aria-haspopup="true" aria-expanded="false" hidden>Ferramentas</button>
           <div id="toolsMenu" class="tools-menu" role="menu" hidden></div>
@@ -306,7 +303,7 @@
       </div>
     </div>
 
-    <script src="/static/js/agent.js"></script>
+    <script src="/static/js/agent.js?v=redlab-private-arena-1"></script>
   </body>
 </html>
 
